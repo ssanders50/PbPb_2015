@@ -54,6 +54,7 @@ bool isTight = false;
 string stag;
 TH1D * centbins;
 TH1I * centRef;
+TH1D * rcnt;
 string rootFile;
 double resA[50];
 double resB[50];
@@ -300,7 +301,12 @@ void GetVN(string rootfile = "../MH.root", string name="N2SUB3",  double mineta 
   }
   TCanvas * ceta[cbins];
   for(int bin = 0; bin<cbins; bin++) {
-    if(bin!=3) continue;
+    int minb = rcnt->FindBin(cmin[bin]);
+    int maxb = rcnt->FindBin(cmax[bin])-1;
+    if(maxb<minb) maxb=minb;
+    int cnt = rcnt->Integral(minb,maxb);
+    cout<<cmin[bin]<<"\t"<<cmax[bin]<<cnt<<endl;
+    if(cnt<1000) continue;
     //pt distribution
     FigSubSubDir = FigSubDir+Form("/eta_%04.1f_%04.1f",EtaMin,EtaMax);
     if(Decor) FigSubSubDir+="_decor";
