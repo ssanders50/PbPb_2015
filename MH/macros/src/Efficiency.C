@@ -31,12 +31,6 @@ TrackType SetTracking( ){
   }
 
   TFile * fin = new TFile(rootFile.data(),"read");
-  if(ntrkbinning) {
-    rcnt = (TH1D *) fin->Get("vnanalyzer/Ntrk");
-  } else {
-    rcnt = (TH1D *) fin->Get("vnanalyzer/cent");
-  }
-  rcnt->SetDirectory(0);
   TDirectory * d = (TDirectory *) fin->Get("vnanalyzer/Conditions");
   TList * l = (TList *) d->GetListOfKeys();
   int indx = 0;
@@ -63,7 +57,6 @@ TrackType SetTracking( ){
 
     cout<<condition<<endl;
   }
-  fin->Close();
   if(sTrackReaction==pp || sTrackReaction==pPb) {
     ncentbins = ncentbinsNOFF;
     cbins = cbinsNOFF;
@@ -88,6 +81,13 @@ TrackType SetTracking( ){
       cmax[i] = cmaxCENT[i];
     }
   }
+  if(ntrkbinning) {
+    rcnt = (TH1D *) fin->Get("vnanalyzer/Ntrk");
+  } else {
+    rcnt = (TH1D *) fin->Get("vnanalyzer/cent");
+  }
+  rcnt->SetDirectory(0);
+  fin->Close();
   return sTrackType;
 }
 double FakeAndEff(int cent, double pt, double emin, double emax, double &eff) {
@@ -153,7 +153,9 @@ double FakeAndEff(int cent, double pt, double emin, double emax, double &eff) {
       eff += he->GetBinContent(i,ptbin);
     }
     eff /=(double)(etabinmax-etabinmin+1);
+    he->Delete();
     e->Close();
+
   } 
 
   if(f!=NULL) {
@@ -170,6 +172,7 @@ double FakeAndEff(int cent, double pt, double emin, double emax, double &eff) {
       val += hf->GetBinContent(i,ptbin);
     }
     val /=(double)(etabinmax-etabinmin+1);
+    hf->Delete();
     f->Close();
   }
   cen->Delete();
