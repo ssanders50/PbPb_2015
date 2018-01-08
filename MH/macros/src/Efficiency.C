@@ -31,6 +31,12 @@ TrackType SetTracking( ){
   }
 
   TFile * fin = new TFile(rootFile.data(),"read");
+  if(ntrkbinning) {
+    rcnt = (TH1D *) fin->Get("vnanalyzer/Ntrk");
+  } else {
+    rcnt = (TH1D *) fin->Get("vnanalyzer/cent");
+  }
+  rcnt->SetDirectory(0);
   TDirectory * d = (TDirectory *) fin->Get("vnanalyzer/Conditions");
   TList * l = (TList *) d->GetListOfKeys();
   int indx = 0;
