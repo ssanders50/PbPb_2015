@@ -185,11 +185,12 @@ void GetVNCreate(int replay , int bin , TGraphErrors * & gint, TGraphErrors * & 
 
     text->SetTextSize(28);
     text->Draw();
-#ifdef NTRK
-    TLatex * t2 = new TLatex(1,0.77*ymax,Form("%d #leq N_{tkr}^{off} < %d",cmin[bin],cmax[bin]));
-#else
-    TLatex * t2 = new TLatex(1,0.77*ymax,Form("%d - %d%c",cmin[bin],cmax[bin],'%'));
-#endif
+    TLatex * t2;
+    if(ntrkbinning) {
+      t2 = new TLatex(1,0.77*ymax,Form("%d #leq N_{tkr}^{off} < %d",cmin[bin],cmax[bin]));
+    } else {
+      t2 = new TLatex(1,0.77*ymax,Form("%d - %d%c",cmin[bin],cmax[bin],'%'));
+    }
     t2->SetTextFont(43);
     t2->SetTextSize(22);
     t2->Draw();
@@ -305,8 +306,8 @@ void GetVN(string rootfile = "../MH.root", string name="N2SUB3",  double mineta 
     int maxb = rcnt->FindBin(cmax[bin])-1;
     if(maxb<minb) maxb=minb;
     int cnt = rcnt->Integral(minb,maxb);
-    cout<<cmin[bin]<<"\t"<<cmax[bin]<<cnt<<endl;
-    if(cnt<1000) continue;
+    cout<<cmin[bin]<<"\t"<<cmax[bin]<<"\t"<<cnt<<endl;
+    if(cnt<5000) continue;
     //pt distribution
     FigSubSubDir = FigSubDir+Form("/eta_%04.1f_%04.1f",EtaMin,EtaMax);
     if(Decor) FigSubSubDir+="_decor";
