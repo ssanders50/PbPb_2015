@@ -1,5 +1,4 @@
-TGraphErrors * GetVNPt(int replay, int bin, int epindx,  double etamin, double etamax, TGraphErrors * &gA, TGraphErrors * &gB, TGraphErrors * &gspec,  double & vint, double & vinte,
-		       double & vintA, double & vintAe, double & vintB, double & vintBe, bool nonorm=false){
+TGraphErrors * GetVNPt(int replay, int bin, int epindx,  double etamin, double etamax, TGraphErrors * &gA, TGraphErrors * &gB, TGraphErrors * &gspec,  double & vint, double & vinte,    double & vintA, double & vintAe, double & vintB, double & vintBe, bool nonorm=false){
 
   TH1D * hspec = 0;
   TH1D * xpt=0;
@@ -296,18 +295,22 @@ TGraphErrors * GetVNPt(int replay, int bin, int epindx,  double etamin, double e
       }
     }
   }
+  TH2D * hsEff;
   if(etamin*etamax<0) {
     xpt = (TH1D *) ptav->ProjectionX("xpt",ietamin1,ietamax2);
     double c = (cmin[bin]+cmax[bin])/2.;
-    TH2D * hsEff = ptcntEff(ptcnt,c);
+    hsEff = ptcntEff(ptcnt,c);
     sp = (TH1D *) hsEff->ProjectionX("sp",ietamin1,ietamax2);
     double ebinsA = ietamax1-ietamin1+1 ;
     double ebinsB = ietamax2-ietamin2+1;
     xpt->Scale(1./(ebinsA+ebinsB));
     sp->Scale(1./(ebinsA+ebinsB));
     vnA = (TH1D *) qA->ProjectionX("vnA",ietamin1,ietamax1);
+    vnA->SetDirectory(0);
     vnB = (TH1D *) qB->ProjectionX("vnB",ietamin2,ietamax2);
+    vnB->SetDirectory(0);
     vn = (TH1D *) vnA->Clone("vn");
+    vn->SetDirectory(0);
     vn->Add(vnB,sign);
     vn->Scale(sign);
     vnA->Scale(1./ebinsA);
@@ -345,6 +348,10 @@ TGraphErrors * GetVNPt(int replay, int bin, int epindx,  double etamin, double e
 	vnA2[j]+= pow(vnAe->GetBinContent(j+1),2);
 	vnB2[j]+= pow(vnBe->GetBinContent(j+1),2);
       }
+      vnAe->Delete();
+      vnBe->Delete();
+      vne->Delete();
+
     }
     for(int j = 0; j<vn->GetNbinsX(); j++) {
       vnm[j]/=10.;
@@ -360,7 +367,7 @@ TGraphErrors * GetVNPt(int replay, int bin, int epindx,  double etamin, double e
   } else {
     xpt = (TH1D *) ptav->ProjectionX("xpt",ietamin1,ietamax1);
     double c = (cmin[bin]+cmax[bin])/2.;
-    TH2D * hsEff = ptcntEff(ptcnt,c);
+    hsEff = ptcntEff(ptcnt,c);
     //hsEff->Draw("colz");
 
     sp = (TH1D *) hsEff->ProjectionX("sp",ietamin1,ietamax1);
@@ -368,11 +375,11 @@ TGraphErrors * GetVNPt(int replay, int bin, int epindx,  double etamin, double e
     xpt->Scale(1./ebinsA);
     sp->Scale(1./ebinsA);
     vnA = (TH1D *) qA->ProjectionX("vnA",ietamin1,ietamax1);
+    vnA->SetDirectory(0);
     vnB = (TH1D *) qB->ProjectionX("vnB",ietamin1,ietamax1);
-
-
-    
+    vnB->SetDirectory(0);
     vn = (TH1D *) vnA->Clone("vn");
+    vn->SetDirectory(0);
     vn->Add(vnB,sign);
     vn->Scale(sign);
     vnA->Scale(1./ebinsA);
@@ -415,7 +422,9 @@ TGraphErrors * GetVNPt(int replay, int bin, int epindx,  double etamin, double e
 	vnA2[j]+= pow(vnAe->GetBinContent(j+1),2);
 	vnB2[j]+= pow(vnBe->GetBinContent(j+1),2);
       }
-
+      vnAe->Delete();
+      vnBe->Delete();
+      vne->Delete();
     }
     for(int j = 0; j<vn->GetNbinsX(); j++) {
       vnm[j]/=10.;
@@ -534,6 +543,35 @@ TGraphErrors * GetVNPt(int replay, int bin, int epindx,  double etamin, double e
   gB->SetMarkerColor(kCyan);
   gB->SetLineColor(kCyan);
   gB->SetLineWidth(2);
+
+  hsEff->Delete();
+  xpt->Delete();
+  sp->Delete();
+  vn->Delete();
+  vnA->Delete();
+  vnB->Delete();
+  qA1->Delete();
+  qB1->Delete();
+  wA1->Delete();
+  wB1->Delete();
+  ptav->Delete();
+  ptcnt->Delete();
+  badcnt->Delete();
+  res2D->Delete();
+  resw2D->Delete();
+  qA->Delete();
+  qB->Delete();
+  wnA->Delete();
+  wnB->Delete();
+  for(int i = 0; i<10; i++) {
+    qAe[i]->Delete();
+    qBe[i]->Delete();
+    wnAe[i]->Delete();
+    wnBe[i]->Delete();
+    qAe1[i]->Delete();
+    qBe1[i]->Delete();
+  }
+
   return g;
 
 }

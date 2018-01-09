@@ -6,6 +6,15 @@ TrackType sTrackType;
 TrackQuality sTrackQuality;
 TrackReaction sTrackReaction;
 
+static const  double cb[14]={0,5,10,15,20,25,30,35,40,50,60,70,80,100};
+static const  double cbe[6]={0,5,10,30,50,100};
+static const  double cbeXeXe[6]={0,10,30,50,70,100};
+TH1I * cen=NULL;
+TH1I * cene=NULL;
+TH1I * ceneXeXe=NULL;
+TFile * fakeFile=NULL;
+TFile * effFile=NULL;
+
 TrackType SetTracking( ){
   //
   //Use directory path to determine reaction
@@ -15,7 +24,7 @@ TrackType SetTracking( ){
   char buf[80];
   fgets(buf,80,fpwd);
   fclose(fpwd);
-  system("delete pwd.lis");
+  system("rm pwd.lis");
   string spwd = buf;
   cout<<spwd<<endl;
   if(spwd.find("pp")!=std::string::npos) {
@@ -88,62 +97,57 @@ TrackType SetTracking( ){
   }
   rcnt->SetDirectory(0);
   fin->Close();
-  return sTrackType;
-}
-double FakeAndEff(int cent, double pt, double emin, double emax, double &eff) {
-  double cb[14]={0,5,10,15,20,25,30,35,40,50,60,70,80,100};
-  double cbe[6]={0,5,10,30,50,100};
-  double cbeXeXe[6]={0,10,30,50,70,100};
-  TFile * f=NULL;
-  TFile * e=NULL;
-  eff = 1.;
-  double val = 0;
   if(sTrackReaction==PbPb) {
     if(sTrackType == Pixel && sTrackQuality == normal) {
-      f = new TFile("EffAndFake/PbPb/FakeRatesPixelPbPb_tight.root");
-      e = new TFile("EffAndFake/PbPb/EffCorrectionsPixelPbPb_tight.root");
+      fakeFile = new TFile("EffAndFake/PbPb/FakeRatesPixelPbPb_tight.root");
+      effFile = new TFile("EffAndFake/PbPb/EffCorrectionsPixelPbPb_tight.root");
     }
     if(sTrackType == Pixel && sTrackQuality == tight){ 
-      f = new TFile("EffAndFake/PbPb/FakeRatesPixelPbPb_tight.root");
-      e = new TFile("EffAndFake/PbPb/EffCorrectionsPixelPbPb_tightB.root");
+      fakeFile = new TFile("EffAndFake/PbPb/FakeRatesPixelPbPb_tight.root");
+      effFile = new TFile("EffAndFake/PbPb/EffCorrectionsPixelPbPb_tightB.root");
     }
     if(sTrackType == Pixel && sTrackQuality == loose){ 
-      f = new TFile("EffAndFake/PbPb/FakeRatesPixelPbPb_loose.root");
-      e = new TFile("EffAndFake/PbPb/EffCorrectionsPixelPbPb_loose.root");
+      fakeFile = new TFile("EffAndFake/PbPb/FakeRatesPixelPbPb_loose.root");
+      effFile = new TFile("EffAndFake/PbPb/EffCorrectionsPixelPbPb_loose.root");
     }
   } else if (sTrackReaction==pPb) {
     if(sTrackQuality == normal) {
-      e = new TFile("EffAndFake/pPb_8TeV/Hijing_8TeV_dataBS.root");
+      effFile = new TFile("EffAndFake/pPb_8TeV/Hijing_8TeV_dataBS.root");
     } else if (sTrackQuality == loose) {
-      e = new TFile("EffAndFake/pPb_8TeV/Hijing_8TeV_MB_eff_v3_loose.root");
+      effFile = new TFile("EffAndFake/pPb_8TeV/Hijing_8TeV_MB_eff_v3_loose.root");
     } else if (sTrackQuality == tight) {
-      e = new TFile("EffAndFake/pPb_8TeV/Hijing_8TeV_MB_eff_v3_tight.root");
+      effFile = new TFile("EffAndFake/pPb_8TeV/Hijing_8TeV_MB_eff_v3_tight.root");
     } else if (sTrackQuality == narrow) {
-      e = new TFile("EffAndFake/pPb_8TeV/Hijing_8TeV_eff_v4_narrow.root");
+      effFile = new TFile("EffAndFake/pPb_8TeV/Hijing_8TeV_eff_v4_narrow.root");
     } else if (sTrackQuality == wide) {
-      e = new TFile("EffAndFake/pPb_8TeV/Hijing_8TeV_v4_wide.root");
+      effFile = new TFile("EffAndFake/pPb_8TeV/Hijing_8TeV_v4_wide.root");
     } 
   } else if (sTrackReaction==XeXe) {
     if(sTrackQuality == normal) {
-      e = new TFile("EffAndFake/XeXe/XeXe_eff_table_92x_cent.root");
+      effFile = new TFile("EffAndFake/XeXe/XeXe_eff_table_92x_cent.root");
     }
-    
   }
-  if(sTrackType == typeUndefined) return 0.;
-  TH1I * cen = new TH1I("cen","cen",13,cb);
-  TH1I * cene = new TH1I("cene","cene",5,cbe);
-  TH1I * ceneXeXe = new TH1I("ceneXeXe","ceneXeXe",5,cbeXeXe);
+  cen = new TH1I("cen","cen",13,cb);
+  cene = new TH1I("cene","cene",5,cbe);
+  ceneXeXe = new TH1I("ceneXeXe","ceneXeXe",5,cbeXeXe);
   cen->SetDirectory(0);
   cene->SetDirectory(0);
   ceneXeXe->SetDirectory(0);
+   
+  return sTrackType;
+}
+double FakeAndEff(int cent, double pt, double emin, double emax, double &eff) {
+  eff = 1.;
+  double val = 0;
+  if(sTrackType == typeUndefined) return 0.;
   int ib = cen->FindBin(cent)-1;
   int ibe = cene->FindBin(cent)-1;
   if(sTrackReaction==XeXe) ibe = ceneXeXe->FindBin(cent)-1;
-  if(e!=NULL) {
+  if(effFile!=NULL) {
     string re = "Eff_"+to_string((int)cbe[ibe])+"_"+to_string((int)cbe[ibe+1]);
     if(sTrackReaction==pPb) re = "rTotalEff3D_0";
     if(sTrackReaction==XeXe) re = "rTotalEff3D_"+to_string((int)cbeXeXe[ibe])+"_"+to_string((int)cbeXeXe[ibe+1]);
-    TH2D * he = (TH2D *) e->Get(re.data());
+    TH2D * he = (TH2D *) effFile->Get(re.data());
     int ptbin = he->GetYaxis()->FindBin(pt);
     if(pt>he->GetYaxis()->GetXmax()) ptbin = he->GetYaxis()->GetLast();
     int etabinmin = he->GetXaxis()->FindBin(emin+0.001);
@@ -154,13 +158,12 @@ double FakeAndEff(int cent, double pt, double emin, double emax, double &eff) {
     }
     eff /=(double)(etabinmax-etabinmin+1);
     he->Delete();
-    e->Close();
 
   } 
 
-  if(f!=NULL) {
+  if(fakeFile!=NULL) {
     string rc = "hfak_"+to_string((int)cb[ib])+"_"+to_string((int)cb[ib+1]);
-    TH2D * hf = (TH2D *) f->Get(rc.data());
+    TH2D * hf = (TH2D *) fakeFile->Get(rc.data());
     if(hf==NULL) {
       cout<<"Failed to find "<<rc<<endl;
     }
@@ -173,11 +176,7 @@ double FakeAndEff(int cent, double pt, double emin, double emax, double &eff) {
     }
     val /=(double)(etabinmax-etabinmin+1);
     hf->Delete();
-    f->Close();
   }
-  cen->Delete();
-  cene->Delete();
-  ceneXeXe->Delete();
   return val ;
 }
 

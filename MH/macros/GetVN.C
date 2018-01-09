@@ -6,6 +6,7 @@
 #include "TCanvas.h"
 #include "TGraphErrors.h"
 #include "TMath.h"
+#include "TStopwatch.h"
 #include <iostream>
 
 #include "src/HiEvtPlaneList.h"
@@ -138,7 +139,7 @@ void GetVNCreate(int replay , int bin , TGraphErrors * & gint, TGraphErrors * & 
   double ymaxspec = 0;
   h->SetMinimum(ymin);
   h->SetMaximum(ymax);
-  TCanvas * c;
+  TCanvas * c=NULL;
   if(plotit) {
     c = new TCanvas(cname.data(),cname.data(),650,500);
     gPad->SetGrid(1,1);
@@ -150,11 +151,10 @@ void GetVNCreate(int replay , int bin , TGraphErrors * & gint, TGraphErrors * & 
   if(NumOnly) numdenom=" (Numerator) ";
   if(DenomOnly) numdenom=" (Denominator) ";
  
-#ifdef NTRK
+
   string yt = ANALS[replay][1]+numdenom+" ("+to_string(cmin[bin])+" #leq N_{trk}^{off} < "+to_string(cmax[bin])+")";
-#else
-  string yt = ANALS[replay][1]+numdenom+" ("+to_string(cmin[bin])+" - "+to_string(cmax[bin])+"%)";
-#endif
+  if(!ntrkbinning) yt = ANALS[replay][1]+numdenom+" ("+to_string(cmin[bin])+" - "+to_string(cmax[bin])+"%)";
+
   FILE * fout;
   if(plotit) {
 
@@ -173,7 +173,6 @@ void GetVNCreate(int replay , int bin , TGraphErrors * & gint, TGraphErrors * & 
       leg->AddEntry(g,"A side only is good","lp");
     }
     leg->AddEntry(gA,"A only","lp");
-
     leg->AddEntry(gB,"B only","lp");
     leg->Draw();
 
@@ -182,7 +181,6 @@ void GetVNCreate(int replay , int bin , TGraphErrors * & gint, TGraphErrors * & 
 
     TLatex * text = new TLatex(1,0.87*ymax,ANALS[replay][0].data());
     text->SetTextFont(43);
-
     text->SetTextSize(28);
     text->Draw();
     TLatex * t2;
@@ -219,8 +217,10 @@ void GetVNCreate(int replay , int bin , TGraphErrors * & gint, TGraphErrors * & 
 
   fclose(fout);
 
+ 
 }
 void GetVN(string rootfile = "../MH.root", string name="N2SUB3",  double mineta = -0.8, double maxeta = 0.8, bool decor = false){
+  TStopwatch * timer = new TStopwatch();
   bool found = false;
   Decor = decor;
   string nlabel = name;
@@ -233,9 +233,7 @@ void GetVN(string rootfile = "../MH.root", string name="N2SUB3",  double mineta 
   if(Decor) nlabel+="_decor";
   rootFile = rootfile;
   SetTracking();
-  if(sTrackType == Pixel && sTrackQuality == normal) tag = "default";
-  if(sTrackType == Pixel && sTrackQuality == tight) tag = "tight";
-  if(sTrackType == Pixel && sTrackQuality == loose) tag = "loose";
+  tag = rootfile.substr(rootfile.find("/")+1,rootfile.find(".root")-rootfile.find("/")-1);
   TGraphErrors * gint[cbins];
   TGraphErrors * gintA[cbins];
   TGraphErrors * gintB[cbins];
@@ -301,12 +299,17 @@ void GetVN(string rootfile = "../MH.root", string name="N2SUB3",  double mineta 
     fclose(ftest);
   }
   TCanvas * ceta[cbins];
+  timer->Start();
   for(int bin = 0; bin<cbins; bin++) {
+    timer->Stop();
+    
     int minb = rcnt->FindBin(cmin[bin]);
     int maxb = rcnt->FindBin(cmax[bin])-1;
     if(maxb<minb) maxb=minb;
     int cnt = rcnt->Integral(minb,maxb);
-    cout<<cmin[bin]<<"\t"<<cmax[bin]<<"\t"<<cnt<<endl;
+    cout<<timer->CpuTime()<<"\t"<<cmin[bin]<<"\t"<<cmax[bin]<<"\t"<<cnt<<endl;
+    timer->ResetCpuTime();
+    timer->Start();
     if(cnt<5000) continue;
     //pt distribution
     FigSubSubDir = FigSubDir+Form("/eta_%04.1f_%04.1f",EtaMin,EtaMax);
