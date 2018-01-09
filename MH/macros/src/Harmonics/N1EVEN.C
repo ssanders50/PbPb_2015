@@ -8,26 +8,41 @@ TGraphErrors * N1EVEN(int replay, int bin, double eMin, double eMax, double & ym
   double vintBe = 0;
   int epindx = -1;
   TGraphErrors * gtmp;
+  TGraphErrors * g2;
+  TGraphErrors * gA2;
+  TGraphErrors * gB2;
+  TGraphErrors * gSpec2;
+  int pRef2 = N1MCp18SUB2;
+  int pRef3 = N1MCp18SUB3;
+  int mRef2 = N1MCm18SUB2;
+  int mRef3 = N1MCm18SUB3;
+  int ioff = 2;
+
+  // int pRef2 = N1MCp22SUB2;
+  // int pRef3 = N1MCp22SUB3;
+  // int mRef2 = N1MCm22SUB2;
+  // int mRef3 = N1MCm22SUB3;
+  // int ioff = 1;
+
   Decor = false;
   //
   // Start with eta distribution
   //
   if(replay==N1EVENSUB2 || replay==N1EVENSUB3) {
-    int ioff = 0;
     for(int i = 0+ioff; i<12-ioff; i++) {
       double EtaMin = -2.4 + 0.4*i;
       double EtaMax = EtaMin+0.4;
       if(fabs(EtaMin)<0.001) EtaMin = 0.;
       if(fabs(EtaMax)<0.001) EtaMax = 0.;
       if(i<6) {
-	int rep = N1MCp18SUB2;
-	if(replay==N1EVENSUB3) rep = N1MCp18SUB3;
+	int rep = pRef2;
+	if(replay==N1EVENSUB3) rep = pRef3;
 	gtmp = GetVNPt(rep,bin,epindx,EtaMin,EtaMax,gtmp, gtmp, gtmp, vint, vinte, vintA, vintAe, vintB, vintBe, false);
 	gint->GetY()[i-ioff] = vintA;
 	gint->GetEY()[i-ioff] = vintAe;
       } else {
-	int rep = N1MCm18SUB2;
-	if(replay==N1EVENSUB3) rep = N1MCm18SUB3;
+	int rep = mRef2;
+	if(replay==N1EVENSUB3) rep = mRef3;
 	gtmp = GetVNPt(rep,bin,epindx,EtaMin,EtaMax,gtmp, gtmp, gtmp, vint, vinte, vintA, vintAe, vintB, vintBe, false);
 	gint->GetY()[i-ioff] = vintA;
 	gint->GetEY()[i-ioff] = vintAe;
@@ -76,36 +91,34 @@ TGraphErrors * N1EVEN(int replay, int bin, double eMin, double eMax, double & ym
     fclose(outint);
   } else {
     int settype = 0;
-    if(eMin>=-0.8) {
-      settype = N1MCm22SUB2;
-    } else if (eMax<=0.8) {
-      settype = N1MCp22SUB2;
-    }
-    double etab = ((EtaMin+EtaMax)/2.+2.2)/0.4;
-    double x[10];
-    double y[10];
-    double ey[10];
-    
-    if(fabs(fmod(etab,1.))<0.05) {
-      int ie = (int)(etab+0.05);
-      if (ie==0) {
-       settype = N1MCp18SUB2;
-      } else if (ie>=1&&ie<=10) {
-	if(etab<0) {
-	  settype = N1MCp22SUB2;
-	} else {
-	  settype = N1MCm22SUB2;
-	}
+    if(eMin*eMax>0) {
+      if(eMin < 0 ) {
+	settype = pRef2;
+	if(replay==N1EVENSUB3) settype=pRef3;
       } else {
-	settype = N1MCm18SUB2;
+	settype = mRef2;
+	if(replay==N1EVENSUB3) settype=mRef3;
       }
+      g = GetVNPt(settype,bin,epindx,eMin,eMax,gA, gB, gSpec, vint, vinte,vintA,vintAe,vintB,vintBe, false);
+    } else {
+      settype = pRef2;
+      if(replay==N1EVENSUB3) settype=pRef3;
+      g = GetVNPt(settype,bin,epindx,eMin,0.,gA, gB, gSpec, vint, vinte,vintA,vintAe,vintB,vintBe, false);
+      settype = mRef2;
+      if(replay==N1EVENSUB3) settype=mRef3;
+      g2 = GetVNPt(settype,bin,epindx,0.,eMax,gA2, gB2, gSpec, vint, vinte,vintA,vintAe,vintB,vintBe, false);
+      for(int i = 0; i<g->GetN(); i++) {
+	g->GetY()[i] = (g->GetY()[i]+g2->GetY()[i])/2.;
+	g->GetEY()[i] = (g->GetEY()[i]+g2->GetEY()[i])/2.;
+	gA->GetY()[i] = (gA->GetY()[i]+gA2->GetY()[i])/2.;
+	gA->GetEY()[i] = (gA->GetEY()[i]+gA2->GetEY()[i])/2.;
+	gB->GetY()[i] = (gB->GetY()[i]+gB2->GetY()[i])/2.;
+	gB->GetEY()[i] = (gB->GetEY()[i]+gB2->GetEY()[i])/2.;
+      }
+    }
   }
-    g = GetVNPt(settype,bin,epindx,eMin,eMax,gA, gB, gSpec, vint, vinte,vintA,vintAe,vintB,vintBe, false);
-    
-    ymin = setYmin(g,gA,gB);
-    ymax = setYmax(g,gA,gB);
-  }
-  
+      ymin = setYmin(g,gA,gB);
+      ymax = setYmax(g,gA,gB);
 
   return g;
 }

@@ -178,7 +178,7 @@ void GetVNCreate(int replay , int bin , TGraphErrors * & gint, TGraphErrors * & 
 
     gA->Draw("p");
     gB->Draw("p");
-
+    g->Draw("p");
     TLatex * text = new TLatex(1,0.87*ymax,ANALS[replay][0].data());
     text->SetTextFont(43);
     text->SetTextSize(28);
@@ -367,6 +367,7 @@ void GetVN(string rootfile = "../MH.root", string name="N2SUB3",  double mineta 
     gint[bin]->Draw("p");
     gintA[bin]->Draw("p");
     gintB[bin]->Draw("p");
+    gint[bin]->Draw("p");
     TLegend * leg2 = new TLegend(0.2,0.2,0.3,0.4);
     leg2->SetTextFont(43);
     leg2->SetTextSize(20);

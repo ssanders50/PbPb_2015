@@ -157,7 +157,6 @@ TGraphErrors * GetVNPt(int replay, int bin, int epindx,  double etamin, double e
   }
   fin->Close();
   if(centcnt<100) {
-    cout<<"centcnt: "<<centcnt<<endl;
     return NULL;
   }
   ptav->Divide(ptcnt);
