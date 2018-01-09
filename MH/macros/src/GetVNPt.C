@@ -160,7 +160,6 @@ TGraphErrors * GetVNPt(int replay, int bin, int epindx,  double etamin, double e
     cout<<"centcnt: "<<centcnt<<endl;
     return NULL;
   }
-
   ptav->Divide(ptcnt);
   
   int ietamin1=0;
@@ -439,6 +438,7 @@ TGraphErrors * GetVNPt(int replay, int bin, int epindx,  double etamin, double e
     }
 
   }
+
   TH1D * yld;
   if(ietamax2>0) {
   yld = ptcnt->ProjectionX("yld",ietamin1,ietamax2);
@@ -557,8 +557,10 @@ TGraphErrors * GetVNPt(int replay, int bin, int epindx,  double etamin, double e
   ptav->Delete();
   ptcnt->Delete();
   badcnt->Delete();
-  res2D->Delete();
-  resw2D->Delete();
+  if(epindx>=0) {
+    res2D->Delete();
+    resw2D->Delete();
+  }
   qA->Delete();
   qB->Delete();
   wnA->Delete();
