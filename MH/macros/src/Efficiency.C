@@ -1,10 +1,11 @@
 enum    TrackType {typeUndefined = 0, ppReco = 1, HIReco, Pixel};
 enum TrackQuality {qualityUndefined = 0, loose = 1, normal, tight, narrow, wide};
 enum TrackReaction {reacUndefined = 0, pp = 1, pPb, XeXe, PbPb};
-
+enum TrackOrientation {orientationUndefined = 0, Type_pPb = 1, Type_Pbp };
 TrackType sTrackType;
 TrackQuality sTrackQuality;
 TrackReaction sTrackReaction;
+TrackOrientation sTrackOrientation;
 
 static const  double cb[14]={0,5,10,15,20,25,30,35,40,50,60,70,80,100};
 static const  double cbe[6]={0,5,10,30,50,100};
@@ -45,6 +46,19 @@ TrackType SetTracking( ){
   }
 
   TFile * fin = new TFile(rootFile.data(),"read");
+  string fname = fin->GetName();
+  if(sTrackReaction==pPb) {
+    if(fname.find("pPb")!=std::string::npos) {
+      sTrackOrientation = Type_pPb;
+      cout<<"Orientation: pPb"<<endl;
+    } else if (fname.find("Pbp")!=std::string::npos) {
+      sTrackOrientation = Type_Pbp;
+      cout<<"Orientation: Pbp"<<endl;
+    } else {
+      sTrackOrientation = orientationUndefined;
+    }
+  }
+  
   TDirectory * d = (TDirectory *) fin->Get("vnanalyzer/Conditions");
   TList * l = (TList *) d->GetListOfKeys();
   int indx = 0;
