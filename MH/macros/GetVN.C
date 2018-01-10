@@ -170,22 +170,22 @@ void GetVNCreate(int replay , int bin , TGraphErrors * & gint, TGraphErrors * & 
     leg->SetFillColor(kWhite);
     leg->SetBorderSize(0);
 
-    if(!SetToA) {
-      if(strncmp(g->GetTitle(),"Graph",5)!=0) {
-	leg->AddEntry(g,g->GetTitle(),"lp");
-      } else {
-	leg->AddEntry(g,"HF both sides","lp");
-      }
-    } else {
-      leg->AddEntry(g,"A side only is good","lp");
-    }
+    // if(!SetToA) {
+    //   if(strncmp(g->GetTitle(),"Graph",5)!=0) {
+    // 	leg->AddEntry(g,g->GetTitle(),"lp");
+    //   } else {
+    // 	leg->AddEntry(g,"HF both sides","lp");
+    //   }
+    // } else {
+    //   leg->AddEntry(g,"A side only is good","lp");
+    // }
     if(strncmp(gA->GetTitle(),"Graph",5)!=0) {
       leg->AddEntry(gA,gA->GetTitle(),"lp");
     } else {
       leg->AddEntry(gA,"A only","lp");
     }
     if(strncmp(gB->GetTitle(),"Graph",5)!=0) {
-      leg->AddEntry(gB,g->GetTitle(),"lp");
+      leg->AddEntry(gB,gB->GetTitle(),"lp");
     } else {
       leg->AddEntry(gB,"B only","lp");
     }

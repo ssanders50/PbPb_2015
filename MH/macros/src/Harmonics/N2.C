@@ -32,6 +32,10 @@ TGraphErrors * N2(int replay, int bin, double eMin, double eMax, double & ymin, 
     gint->SetTitle("p-side + Pb-side");
     gintA->SetTitle("p-side");
     gintB->SetTitle("Pb-side");
+    if(sTrackOrientation==Type_pPb) {
+      gintA->SetTitle("Pb-side");
+      gintB->SetTitle("p-side");
+    }
   }
 
   //
@@ -48,6 +52,15 @@ TGraphErrors * N2(int replay, int bin, double eMin, double eMax, double & ymin, 
   g->SetTitle("HF^{+} + HF^{-}");
   gA->SetTitle("HF^{+}");
   gB->SetTitle("HF^{-}");
+  if(sTrackReaction == pPb) {
+    g->SetTitle("p-side + Pb-side");
+    gA->SetTitle("p-side");
+    gB->SetTitle("Pb-side");
+    if(sTrackOrientation==Type_pPb) {
+      gA->SetTitle("Pb-side");
+      gB->SetTitle("p-side");
+    }
+  }
   
   return g;
 }

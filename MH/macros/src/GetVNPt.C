@@ -76,10 +76,8 @@ TGraphErrors * GetVNPt(int replay, int bin, int epindx,  double etamin, double e
       if(epindx>=0) {
 	res2D  = (TH2D *) fin->Get(Form("vnanalyzer/Resolutions/%s/res%d",rdir.data(),EPOrder[epindx]));
 	res2D->SetDirectory(0);
-	flip2D(res2D);
 	resw2D = (TH2D *) fin->Get(Form("vnanalyzer/Resolutions/%s/resw%d",rdir.data(),EPOrder[epindx]));
 	resw2D->SetDirectory(0);
-	flip2D(resw2D);
       }
       ptav = (TH2D *) fin->Get(Form("vnanalyzer/Harmonics/%s/ptav",crange.data()));
       ptav->SetDirectory(0);
@@ -130,8 +128,8 @@ TGraphErrors * GetVNPt(int replay, int bin, int epindx,  double etamin, double e
     } else {
       centcnt+=centbins->GetBinContent(j);
       if(epindx>=0) {
-	res2D->Add( flip2D((TH2D *) fin->Get(Form("vnanalyzer/Resolutions/%s/res%d",rdir.data(),EPOrder[epindx]))));
-	resw2D->Add(flip2D( (TH2D *) fin->Get(Form("vnanalyzer/Resolutions/%s/resw%d",rdir.data(),EPOrder[epindx]))));
+	res2D->Add( (TH2D *) fin->Get(Form("vnanalyzer/Resolutions/%s/res%d",rdir.data(),EPOrder[epindx])));
+	resw2D->Add( (TH2D *) fin->Get(Form("vnanalyzer/Resolutions/%s/resw%d",rdir.data(),EPOrder[epindx])));
       }
       ptav->Add( flip2D((TH2D *) fin->Get(Form("vnanalyzer/Harmonics/%s/ptav",crange.data()))));
       ptcnt->Add(flip2D( (TH2D *) fin->Get(Form("vnanalyzer/Harmonics/%s/ptcnt",crange.data()))));

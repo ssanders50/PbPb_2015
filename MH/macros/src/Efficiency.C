@@ -166,6 +166,15 @@ TrackType SetTracking( ){
 double FakeAndEff(int cent, double pt, double emin, double emax, double &eff) {
   eff = 1.;
   double val = 0;
+  double holdemin = emin;
+  double holdemax = emax;
+  emax = emax - 0.002;
+  if(sTrackReaction==pPb && sTrackOrientation==Type_pPb) {
+    double hold = emax;
+    emax = -emin-0.001;
+    if(emin>0) emax = -emin+0.001;
+    emin = -hold;
+  }
   if(sTrackType == typeUndefined) return 0.;
   int ib = cen->FindBin(cent)-1;
   int ibe = cene->FindBin(cent)-1;

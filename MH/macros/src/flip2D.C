@@ -1,6 +1,6 @@
 TH2D * flip2D(TH2D * h) {
-  if(sTrackReaction!=pPb) h;
-  if(sTrackOrientation!=Type_pPb) h;
+  if(sTrackReaction!=pPb) return h;
+  if(sTrackOrientation==Type_Pbp) return h;
   int nx = h->GetNbinsX();
   int ny = h->GetNbinsY();
   for(int j = 1; j<=ny/2; j++) {
