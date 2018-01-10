@@ -29,14 +29,19 @@ TrackType SetTracking( ){
   cout<<spwd<<endl;
   if(spwd.find("pp")!=std::string::npos) {
     sTrackReaction=pp;
+    cout<<"System: pp"<<endl;
   } else if (spwd.find("pPb")!=std::string::npos) {
     sTrackReaction = pPb;
+    cout<<"System: pPb"<<endl;
   } else if (spwd.find("XeXe")!=std::string::npos) {
     sTrackReaction = XeXe;
+    cout<<"System: XeXe"<<endl;
   } else if (spwd.find("PbPb")!=std::string::npos) {
     sTrackReaction = PbPb;
+    cout<<"System: PbPb"<<endl;
   } else {
     sTrackReaction = reacUndefined;
+    cout<<"System: undefined"<<endl;
   }
 
   TFile * fin = new TFile(rootFile.data(),"read");
@@ -55,7 +60,7 @@ TrackType SetTracking( ){
       if(condition == "dzdzerror_0002.00") sTrackQuality = normal;
       if(condition == "dzdzerror_0005.00") sTrackQuality = loose;
       if(condition == "dzdzerror_0001.50") sTrackQuality = tight;
-    } else if (sTrackType == ppReco && sTrackReaction == pPb) {
+    } else if (sTrackType == ppReco || sTrackReaction == pPb) {
       cout<<"pPb with ppReco:"<<condition<<":"<<endl;
       if(condition == "dzdzerror_0003.00") sTrackQuality = normal;
       if(condition == "dzdzerror_0005.00") sTrackQuality = loose;
@@ -126,6 +131,11 @@ TrackType SetTracking( ){
     if(sTrackQuality == normal) {
       effFile = new TFile("EffAndFake/XeXe/XeXe_eff_table_92x_cent.root");
     }
+  }
+  if(effFile!=NULL) {
+    cout<<"Efficiency File: "<<effFile->GetName()<<endl;
+  } else {
+    cout<<"Efficiency file not found."<<endl;
   }
   cen = new TH1I("cen","cen",13,cb);
   cene = new TH1I("cene","cene",5,cbe);
