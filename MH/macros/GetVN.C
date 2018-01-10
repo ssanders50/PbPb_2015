@@ -63,9 +63,11 @@ double resAdenom[50];
 double resBdenom[50];
 #include "src/Types.h"
 #include "src/Efficiency.C"
+#include "src/flip2D.C"
 #include "src/GetVNPt.C"
 #include "src/Harmonics.h"
 #include "src/drawSpec.C"
+
 TH1D * h = 0;
 void GetVNCreate(int replay , int bin , TGraphErrors * & gint, TGraphErrors * & gintA, TGraphErrors *& gintB,  bool plotit=true, bool NumOnly=false, bool DenomOnly=false ){
   TH1D * hspec = 0;
@@ -167,13 +169,27 @@ void GetVNCreate(int replay , int bin , TGraphErrors * & gint, TGraphErrors * & 
     leg->SetTextSize(20);
     leg->SetFillColor(kWhite);
     leg->SetBorderSize(0);
+
     if(!SetToA) {
-      leg->AddEntry(g,"HF both sides","lp");
+      if(strncmp(g->GetTitle(),"Graph",5)!=0) {
+	leg->AddEntry(g,g->GetTitle(),"lp");
+      } else {
+	leg->AddEntry(g,"HF both sides","lp");
+      }
     } else {
       leg->AddEntry(g,"A side only is good","lp");
     }
-    leg->AddEntry(gA,"A only","lp");
-    leg->AddEntry(gB,"B only","lp");
+    if(strncmp(gA->GetTitle(),"Graph",5)!=0) {
+      leg->AddEntry(gA,gA->GetTitle(),"lp");
+    } else {
+      leg->AddEntry(gA,"A only","lp");
+    }
+    if(strncmp(gB->GetTitle(),"Graph",5)!=0) {
+      leg->AddEntry(gB,g->GetTitle(),"lp");
+    } else {
+      leg->AddEntry(gB,"B only","lp");
+    }
+    
     leg->Draw();
 
     gA->Draw("p");
@@ -307,7 +323,7 @@ void GetVN(string rootfile = "../MH.root", string name="N2SUB3",  double mineta 
     int maxb = rcnt->FindBin(cmax[bin])-1;
     if(maxb<minb) maxb=minb;
     int cnt = rcnt->Integral(minb,maxb);
-    cout<<timer->CpuTime()<<"\t"<<cmin[bin]<<"\t"<<cmax[bin]<<"\t"<<cnt<<endl;
+    cout<<"time: "<<timer->CpuTime()<<"\t"<<cmin[bin]<<"\t"<<cmax[bin]<<"\t"<<cnt<<endl;
     timer->ResetCpuTime();
     timer->Start();
     if(cnt<5000) continue;
@@ -373,9 +389,23 @@ void GetVN(string rootfile = "../MH.root", string name="N2SUB3",  double mineta 
     leg2->SetTextSize(20);
     leg2->SetFillColor(kWhite);
     leg2->SetBorderSize(0);
-    leg2->AddEntry(gint[bin],"Adopted","lp");
-    leg2->AddEntry(gintA[bin],"A side","lp");
-    leg2->AddEntry(gintB[bin],"B side","lp");
+    if(strncmp(gint[bin]->GetTitle(),"Graph",5)!=0) {
+      leg2->AddEntry(gint[bin],gint[bin]->GetTitle(),"lp");
+    } else {
+      leg2->AddEntry(gint[bin],"Adopted","lp");
+    }
+    if(strncmp(gintA[bin]->GetTitle(),"Graph",5)!=0) {
+      leg2->AddEntry(gintA[bin],gintA[bin]->GetTitle(),"lp");
+    } else {
+      leg2->AddEntry(gintA[bin],"A side","lp");
+    }
+    if(strncmp(gintB[bin]->GetTitle(),"Graph",5)!=0) {
+      leg2->AddEntry(gintB[bin],gintB[bin]->GetTitle(),"lp");
+    } else {
+      leg2->AddEntry(gintB[bin],"B side","lp");
+    }
+
+
     leg2->Draw();
     TLatex * tl = new TLatex( -1,0.3*(ymax-ymin)+ymin,nl3.data());
     tl->Draw();

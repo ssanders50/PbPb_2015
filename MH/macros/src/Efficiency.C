@@ -70,20 +70,23 @@ TrackType SetTracking( ){
     if(condition == "hiGeneralTracks") sTrackType = HIReco;
     if(condition == "generalTracks") sTrackType = ppReco;
     if(sTrackType == Pixel) {
-      cout<<"Pixel:"<<condition<<":"<<endl;
+      cout<<"Pixel: "<<condition<<":"<<endl;
       if(condition == "dzdzerror_0002.00") sTrackQuality = normal;
       if(condition == "dzdzerror_0005.00") sTrackQuality = loose;
       if(condition == "dzdzerror_0001.50") sTrackQuality = tight;
     } else if (sTrackType == ppReco || sTrackReaction == pPb) {
-      cout<<"pPb with ppReco:"<<condition<<":"<<endl;
+      cout<<"pPb with ppReco: "<<condition<<":"<<endl;
       if(condition == "dzdzerror_0003.00") sTrackQuality = normal;
       if(condition == "dzdzerror_0005.00") sTrackQuality = loose;
       if(condition == "dzdzerror_0002.00") sTrackQuality = tight;
+    } else if (sTrackType == HIReco) {
+      cout<<"HIReco: "<<condition<<":"<<endl;
+    } else {
+      cout<<"undefined TrackType: "<<condition<<endl;
     }
     if(condition == "vtx_-15.0_ 3.0") sTrackQuality = narrow;
     if(condition == "vtx_- 3.0_15.0") sTrackQuality = wide;
 
-    cout<<condition<<endl;
   }
   if(sTrackReaction==pp || sTrackReaction==pPb) {
     ncentbins = ncentbinsNOFF;

@@ -18,18 +18,22 @@ TGraphErrors * N2(int replay, int bin, double eMin, double eMax, double & ymin, 
     gtmp = GetVNPt(replay,bin,epindx,EtaMin,EtaMax,gtmp, gtmp, gtmp, vint, vinte, vintA, vintAe, vintB, vintBe, false);
     fin->Close();
     fin = new TFile(rootFile.data(),"r");
-    if(i<6) {
-      gint->GetY()[i] = vintA;
-      gint->GetEY()[i] = vintAe;
-    } else {
-      gint->GetY()[i] = vintB;
-      gint->GetEY()[i] = vintBe;
-    }
+    gint->GetY()[i] = (vintA+vintB)/2.;
+    gint->GetEY()[i] = (vintAe+vintBe)/2.;
     gintA->GetY()[i]=vintA;
     gintA->GetEY()[i]=vintAe;
     gintB->GetY()[i]=vintB;
     gintB->GetEY()[i]=vintBe;
   }
+  gint->SetTitle("HF^{+} + HF^{-}");
+  gintA->SetTitle("HF^{+}");
+  gintB->SetTitle("HF^{-}");
+  if(sTrackReaction == pPb) {
+    gint->SetTitle("p-side + Pb-side");
+    gintA->SetTitle("p-side");
+    gintB->SetTitle("Pb-side");
+  }
+
   //
   // Now do requested calculation
   //
@@ -41,5 +45,9 @@ TGraphErrors * N2(int replay, int bin, double eMin, double eMax, double & ymin, 
   fprintf(outint,"%d\t%d\t%15.10f\t%15.10f\n",cmin[bin],cmax[bin],vint,vinte);
   fclose(outint);
   cout<<"Integral: "<<eMin<<"\t"<<eMax<<"\t"<<vint<<endl;
+  g->SetTitle("HF^{+} + HF^{-}");
+  gA->SetTitle("HF^{+}");
+  gB->SetTitle("HF^{-}");
+  
   return g;
 }
