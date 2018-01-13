@@ -126,7 +126,7 @@ TrackType SetTracking( ){
     }
     if(sTrackType == Pixel && sTrackQuality == tight){ 
       fakeFile = new TFile("EffAndFake/PbPb/FakeRatesPixelPbPb_tight.root");
-      effFile = new TFile("EffAndFake/PbPb/EffCorrectionsPixelPbPb_tightB.root");
+      effFile = new TFile("EffAndFake/PbPb/EffCorrectionsPixelPbPb_TightB.root");
     }
     if(sTrackType == Pixel && sTrackQuality == loose){ 
       fakeFile = new TFile("EffAndFake/PbPb/FakeRatesPixelPbPb_loose.root");

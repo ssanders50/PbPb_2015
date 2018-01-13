@@ -24,7 +24,7 @@ enum AnalTypes{
 static const string ANALS[150][3] {
     "N1SUB2",             "v_{1}\{#Psi_{1}}",    "2 sub-event resolution - HF+ summed with HF-",
     "N1SUB3",             "v_{1}\{#Psi_{1}}",    "3 sub-event resolution - HF+ summed with HF-",
-"N1EVENSUB2",      "v_{1}^{even}\{#Psi_{1}}",    "DO NOT USE, A and B EP cover different #eta ranges",
+"N1EVENSUB2",      "v_{1}^{even}\{#Psi_{1}}",    "",
 "N1EVENSUB3",      "v_{1}^{even}\{#Psi_{1}}",                                 "",
    "N1ASUB2",             "v_{1}\{#Psi_{1}}",     "2 sub-event resolution - need to add to N1B",
 

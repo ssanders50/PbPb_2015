@@ -1,7 +1,5 @@
-TGraphErrors * N123(int replay, int bin, double eMin, double eMax, double & ymin, double & ymax, TGraphErrors * &g,TGraphErrors * &gA, TGraphErrors * &gB, TGraphErrors * &gSpec, TGraphErrors * &gint, TGraphErrors *& gintA, TGraphErrors *& gintB ){
+TGraphErrors * N123(int replay, int bin, double eMin, double eMax, double & ymin, double & ymax, TGraphErrors * &g,TGraphErrors * &gA, TGraphErrors * &gB, TGraphErrors * &gSpec, TGraphErrors * &gint, TGraphErrors *& gintA, TGraphErrors *& gintB, double & vint, double & vinte, double & vintA, double & vintAe, double & vintB, double & vintBe ){
   fin = new TFile(rootFile.data(),"r");
-  double vint = 0;
-  double vinte = 0;
   int epindx = -1;
   if(replay == N123ASUB2 || replay == N123ASUB3 || replay == N123BSUB2 || replay == N123BSUB3){
     g = GetVNPt(replay,bin,epindx,eMin,eMax,gA, gB, gSpec, gint, gintA,gintB,vint, vinte, false);

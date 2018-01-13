@@ -1,11 +1,5 @@
-TGraphErrors * N62(int replay, int bin, double eMin, double eMax, double & ymin, double & ymax, TGraphErrors * &g,TGraphErrors * &gA, TGraphErrors * &gB, TGraphErrors * &gSpec,TGraphErrors * &gint, TGraphErrors *& gintA, TGraphErrors *& gintB){
+TGraphErrors * N62(int replay, int bin, double eMin, double eMax, double & ymin, double & ymax, TGraphErrors * &g,TGraphErrors * &gA, TGraphErrors * &gB, TGraphErrors * &gSpec,TGraphErrors * &gint, TGraphErrors *& gintA, TGraphErrors *& gintB, double & vint, double & vinte, double & vintA, double & vintAe, double & vintB, double & vintBe){
   fin = new TFile(rootFile.data(),"r");
-  double vint = 0;
-  double vinte = 0;
-  double vintA = 0;
-  double vintAe = 0;
-  double vintB = 0;
-  double vintBe = 0;
   Decor = false;
   TGraphErrors * gtmp;
   //

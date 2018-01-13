@@ -61,18 +61,22 @@ double resA[50];
 double resB[50];
 double resAdenom[50];
 double resBdenom[50];
+double PTMAX = 0;
+double VNMIN = 0;
+double VNMAX=0;
+double VNINTMIN=0;
+double VNINTMAX=0;
 #include "src/Types.h"
 #include "src/Efficiency.C"
 #include "src/flip2D.C"
 #include "src/GetVNPt.C"
 #include "src/Harmonics.h"
 #include "src/drawSpec.C"
-
 TH1D * h = 0;
 void GetVNCreate(int replay , int bin , TGraphErrors * & gint, TGraphErrors * & gintA, TGraphErrors *& gintB,  bool plotit=true, bool NumOnly=false, bool DenomOnly=false ){
   TH1D * hspec = 0;
   string cname = ANALS[replay][0]+"_"+to_string(cmin[bin])+"_"+to_string(cmax[bin])+Form("_eta_%03.1f_%03.1f",EtaMin,EtaMax);
-  h = new TH1D("h","h",100,0,12.);
+  h = new TH1D("h","h",100,0,PTMAX);
   h->SetDirectory(0);
   h->SetMinimum(0);
 
@@ -82,65 +86,71 @@ void GetVNCreate(int replay , int bin , TGraphErrors * & gint, TGraphErrors * & 
   TGraphErrors * gB;
   TGraphErrors * gspec;
   TGraphErrors * nwspec2;
-  double vint = 0;
-  double vinte = 0;
-  double vintdenom = 0;
-  double vintedenom = 0;
   double ymin = 0;
   double ymax = 1;
-  if(replay==N1SUB2   || replay==N1SUB3)   g =   N1(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if(replay==N1ASUB2   || replay==N1ASUB3)   g =   N1(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if(replay==N1BSUB2   || replay==N1BSUB3)   g =   N1(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
+  double vint = 0;
+  double vinte = 0;
+  double vintA = 0;
+  double vintAe = 0;
+  double vintB = 0;
+  double vintBe = 0;
+
+  if(replay==N1SUB2   || replay==N1SUB3)   g =   N1(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if(replay==N1ASUB2   || replay==N1ASUB3)   g =   N1(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if(replay==N1BSUB2   || replay==N1BSUB3)   g =   N1(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
   if(replay==N1MCm22SUB3 || replay==N1MCm18SUB3 || replay==N1MCm14SUB3 || replay==N1MCm10SUB3 ||
      replay==N1MCm06SUB3 || replay==N1MCm02SUB3 || replay==N1MCp22SUB3 || replay==N1MCp18SUB3 ||
      replay==N1MCp14SUB3 || replay==N1MCp10SUB3 ||  replay==N1MCp06SUB3 || replay==N1MCp02SUB3 )
-    g =   N1EVEN(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
+    g =   N1EVEN(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
   if(replay==N1MCm22SUB2 || replay==N1MCm18SUB2 || replay==N1MCm14SUB2 || replay==N1MCm10SUB2 ||
      replay==N1MCm06SUB2 || replay==N1MCm02SUB2 || replay==N1MCp22SUB2 || replay==N1MCp18SUB2 ||
      
      replay==N1MCp14SUB2 || replay==N1MCp10SUB2 ||  replay==N1MCp06SUB2 || replay==N1MCp02SUB2 )
-    g =   N1EVEN(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if(replay==N1EVENSUB2 || replay==N1EVENSUB3) g =   N1EVEN(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if(replay==N112SUB2   || replay==N112SUB3)   g =   N112(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if(replay==N112ASUB2   || replay==N112ASUB3)   g =   N112(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if(replay==N112BSUB2   || replay==N112BSUB3)   g =   N112(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  // if(replay==N123SUB2   || replay==N123SUB3)   g =   N123(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  // if(replay==N123ASUB2   || replay==N123ASUB3)   g =   N123(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  // if(replay==N123BSUB2   || replay==N123BSUB3)   g =   N123(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if(replay==N2SUB2   || replay==N2SUB3)   g =   N2(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if(replay==N3SUB2   || replay==N3SUB3)   g =   N3(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if(replay==N4SUB2   || replay==N4SUB3)   g =   N4(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if(replay==N5SUB2   || replay==N5SUB3)   g =   N5(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if(replay==N6SUB2   || replay==N6SUB3)   g =   N6(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if(replay==N7SUB2   || replay==N7SUB3)   g =   N7(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if(replay==N523SUB2 || replay==N523SUB3) g = N523(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if(replay==N523ASUB2 || replay==N523ASUB3) g = N523(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if(replay==N42SUB2   || replay==N42SUB3)   g =   N42(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if(replay==N42ASUB2   || replay==N42ASUB3)   g =   N42(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if( replay==N42BSUB3)   g =   N42(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if( replay==N42CSUB3)   g =   N42(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if(replay==N62SUB2   || replay==N62SUB3)   g =   N62(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if(replay==N62ASUB3)   g =   N62(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if(replay==N63SUB2   || replay==N63SUB3)   g =   N63(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if(replay==N63ASUB2 || replay==N63ASUB3)   g =   N63(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if( replay==N63BSUB3)   g =   N63(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if( replay==N63CSUB3)   g =   N63(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if( replay==CHI4)    g = CHI4(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if( replay==CHI4A)   g = CHI4(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if( replay==CHI5)    g = CHI5(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if( replay==CHI5A)   g = CHI5(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if( replay==CHI62)    g = CHI62(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if( replay==CHI62A)   g = CHI62(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if( replay==CHI63)    g = CHI63(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if( replay==CHI63A)   g = CHI63(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if( replay==CHI7)    g = CHI7(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if( replay==CHI7A)   g = CHI7(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if(replay==N723SUB2 || replay==N723SUB3) g = N723(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
-  if(replay==N723ASUB2 || replay==N723ASUB3) g = N723(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB);
+    g =   N1EVEN(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if(replay==N1EVENSUB2 || replay==N1EVENSUB3) g =   N1EVEN(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if(replay==N112SUB2   || replay==N112SUB3)   g =   N112(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if(replay==N112ASUB2   || replay==N112ASUB3)   g =   N112(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if(replay==N112BSUB2   || replay==N112BSUB3)   g =   N112(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  // if(replay==N123SUB2   || replay==N123SUB3)   g =   N123(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  // if(replay==N123ASUB2   || replay==N123ASUB3)   g =   N123(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  // if(replay==N123BSUB2   || replay==N123BSUB3)   g =   N123(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if(replay==N2SUB2   || replay==N2SUB3)   g =   N2(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if(replay==N3SUB2   || replay==N3SUB3)   g =   N3(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if(replay==N4SUB2   || replay==N4SUB3)   g =   N4(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if(replay==N5SUB2   || replay==N5SUB3)   g =   N5(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if(replay==N6SUB2   || replay==N6SUB3)   g =   N6(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if(replay==N7SUB2   || replay==N7SUB3)   g =   N7(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if(replay==N523SUB2 || replay==N523SUB3) g = N523(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if(replay==N523ASUB2 || replay==N523ASUB3) g = N523(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if(replay==N42SUB2   || replay==N42SUB3)   g =   N42(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if(replay==N42ASUB2   || replay==N42ASUB3)   g =   N42(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if( replay==N42BSUB3)   g =   N42(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if( replay==N42CSUB3)   g =   N42(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if(replay==N62SUB2   || replay==N62SUB3)   g =   N62(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if(replay==N62ASUB3)   g =   N62(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if(replay==N63SUB2   || replay==N63SUB3)   g =   N63(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if(replay==N63ASUB2 || replay==N63ASUB3)   g =   N63(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if( replay==N63BSUB3)   g =   N63(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if( replay==N63CSUB3)   g =   N63(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if( replay==Chi4)    g = CHI4(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if( replay==Chi4A)   g = CHI4(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if( replay==Chi5)    g = CHI5(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if( replay==Chi5A)   g = CHI5(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if( replay==Chi62)    g = CHI62(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if( replay==Chi62A)   g = CHI62(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if( replay==Chi63)    g = CHI63(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if( replay==Chi63A)   g = CHI63(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if( replay==Chi7)    g = CHI7(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if( replay==Chi7A)   g = CHI7(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if(replay==N723SUB2 || replay==N723SUB3) g = N723(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
+  if(replay==N723ASUB2 || replay==N723ASUB3) g = N723(replay,bin,EtaMin,EtaMax,ymin,ymax,g,gA,gB,gspec,gint,gintA, gintB,vint,vinte,vintA,vintAe,vintB,vintBe);
 
   double ymaxspec = 0;
   h->SetMinimum(ymin);
   h->SetMaximum(ymax);
+  if(VNMIN>-10) h->SetMinimum(VNMIN);
+  if(VNMAX>-10) h->SetMaximum(VNMAX);
+
   TCanvas * c=NULL;
   if(plotit) {
     c = new TCanvas(cname.data(),cname.data(),650,500);
@@ -161,56 +171,59 @@ void GetVNCreate(int replay , int bin , TGraphErrors * & gint, TGraphErrors * & 
   if(plotit) {
 
     h->SetYTitle(yt.data());
-    g->Draw("p");  
+    if(strncmp(g->GetTitle(),"NOGOOD",6)!=0) g->Draw("p");  
 
-    TLegend * leg = new TLegend(0.65,0.65,0.9,0.9);
+    TLegend * leg = new TLegend(0.45,0.15,0.95,0.33);
     leg->SetTextFont(43);
-
-    leg->SetTextSize(20);
+    leg->SetTextSize(16);
     leg->SetFillColor(kWhite);
     leg->SetBorderSize(0);
 
-    // if(!SetToA) {
-    //   if(strncmp(g->GetTitle(),"Graph",5)!=0) {
-    // 	leg->AddEntry(g,g->GetTitle(),"lp");
-    //   } else {
-    // 	leg->AddEntry(g,"HF both sides","lp");
-    //   }
-    // } else {
-    //   leg->AddEntry(g,"A side only is good","lp");
-    // }
+    string s = "A+B only";
+    if(strncmp(g->GetTitle(),"Graph",5)!=0) {
+      s = g->GetTitle(); 
+    }
+    string append =Form("%5.4f#pm%5.4f",vint,vinte); 
+    s+=" (<> = "+append+")";
+    if(strncmp(g->GetTitle(),"NOGOOD",6)!=0) leg->AddEntry(g,s.data(),"lp");
+
+    string sA = "A only";
     if(strncmp(gA->GetTitle(),"Graph",5)!=0) {
-      leg->AddEntry(gA,gA->GetTitle(),"lp");
-    } else {
-      leg->AddEntry(gA,"A only","lp");
+      sA = gA->GetTitle(); 
     }
+    append =Form("%5.4f#pm%5.4f",vintA,vintAe); 
+    sA+=" (<> = "+append+")";
+    if(strncmp(gA->GetTitle(),"NOGOOD",6)!=0) leg->AddEntry(gA,sA.data(),"lp");
+
+    string sB = "B only";
     if(strncmp(gB->GetTitle(),"Graph",5)!=0) {
-      leg->AddEntry(gB,gB->GetTitle(),"lp");
-    } else {
-      leg->AddEntry(gB,"B only","lp");
+      sB = gB->GetTitle(); 
     }
+    append =Form("%5.4f#pm%5.4f",vintB,vintBe); 
+    sB+=" (<> = "+append+")";
+    if(strncmp(gB->GetTitle(),"NOGOOD",6)!=0) leg->AddEntry(gB,sB.data(),"lp");
     
     leg->Draw();
 
-    gA->Draw("p");
-    gB->Draw("p");
-    g->Draw("p");
-    TLatex * text = new TLatex(1,0.87*ymax,ANALS[replay][0].data());
+    if(strncmp(gA->GetTitle(),"NOGOOD",6)!=0) gA->Draw("p");
+    if(strncmp(gB->GetTitle(),"NOGOOD",6)!=0) gB->Draw("p");
+    if(strncmp(g->GetTitle(),"NOGOOD",6)!=0) g->Draw("p");
+    TLatex * text = new TLatex(0.1*PTMAX,0.90*ymax,ANALS[replay][0].data());
     text->SetTextFont(43);
-    text->SetTextSize(28);
+    text->SetTextSize(24);
     text->Draw();
     TLatex * t2;
     if(ntrkbinning) {
-      t2 = new TLatex(1,0.77*ymax,Form("%d #leq N_{tkr}^{off} < %d",cmin[bin],cmax[bin]));
+      t2 = new TLatex(0.1*PTMAX,0.85*(ymax-ymin)+ymin,Form("%d #leq N_{tkr}^{off} < %d",cmin[bin],cmax[bin]));
     } else {
-      t2 = new TLatex(1,0.77*ymax,Form("%d - %d%c",cmin[bin],cmax[bin],'%'));
+      t2 = new TLatex(0.1*PTMAX,0.85*(ymax-ymin)+ymin,Form("%d - %d%c",cmin[bin],cmax[bin],'%'));
     }
     t2->SetTextFont(43);
-    t2->SetTextSize(22);
+    t2->SetTextSize(20);
     t2->Draw();
-    TLatex * t3 = new TLatex(0.8,0.67*ymax,Form("%4.1f < #eta < %4.1f",EtaMin,EtaMax));
+    TLatex * t3 = new TLatex(0.1*PTMAX,0.80*(ymax-ymin)+ymin,Form("%4.1f < #eta < %4.1f",EtaMin,EtaMax));
     t3->SetTextFont(43);
-    t3->SetTextSize(22);
+    t3->SetTextSize(20);
     t3->Draw();
     c->Print(Form("%s/%s.pdf",FigSubSubDir.data(), cname.data()),"pdf");
   }
@@ -235,10 +248,16 @@ void GetVNCreate(int replay , int bin , TGraphErrors * & gint, TGraphErrors * & 
 
  
 }
-void GetVN(string rootfile = "../MH.root", string name="N2SUB3",  double mineta = -0.8, double maxeta = 0.8, bool decor = false){
+void GetVN(string rootfile = "../MH.root", string name="N2SUB3",  double mineta = -0.8, double maxeta = 0.8, bool decor = false, int selbin = -1,
+	   double ptmax = 12, double vnmin=-100, double vnmax=-100, double vnintmin=-100, double vnintmax=-100){
   TStopwatch * timer = new TStopwatch();
   bool found = false;
   Decor = decor;
+  PTMAX=ptmax;
+  VNMIN=vnmin;
+  VNMAX=vnmax;
+  VNINTMIN=vnintmin;
+  VNINTMAX=vnintmax;
   string nlabel = name;
   if(name.find("SUB2")!=std::string::npos) Decor = false;
   if(name.find("N1MC")!=std::string::npos) Decor = false;
@@ -318,7 +337,7 @@ void GetVN(string rootfile = "../MH.root", string name="N2SUB3",  double mineta 
   timer->Start();
   for(int bin = 0; bin<cbins; bin++) {
     timer->Stop();
-    
+    if(selbin>=0 && bin!=selbin) continue;
     int minb = rcnt->FindBin(cmin[bin]);
     int maxb = rcnt->FindBin(cmax[bin])-1;
     if(maxb<minb) maxb=minb;
@@ -371,48 +390,49 @@ void GetVN(string rootfile = "../MH.root", string name="N2SUB3",  double mineta 
     gintA[bin]->ComputeRange(xminA,yminA,xmaxA,ymaxA);
     gintB[bin]->ComputeRange(xminB,yminB,xmaxB,ymaxB);
     ymin = plotmin(min(ymin,yminA));
-    //ymin = min(ymin,yminB);
+    if(ymin<-0.04) ymin=-0.04;
     ymax = plotmax(max(ymax,ymaxA));
-    //ymax = max(ymax,ymaxB);
 
     heta->SetMaximum(ymax);
     heta->SetMinimum(ymin);
+    if(VNINTMIN>-10) heta->SetMinimum(VNINTMIN);
+    if(VNINTMAX>-10) heta->SetMaximum(VNINTMAX);
     heta->SetXTitle("#eta");
     heta->SetYTitle(ANALS[en][1].data());
     heta->Draw();
-    gint[bin]->Draw("p");
-    gintA[bin]->Draw("p");
-    gintB[bin]->Draw("p");
-    gint[bin]->Draw("p");
-    TLegend * leg2 = new TLegend(0.2,0.2,0.3,0.4);
+    if(strncmp(gint[bin]->GetTitle(),"NOGOOD",6)!=0) gint[bin]->Draw("p");
+    if(strncmp(gintA[bin]->GetTitle(),"NOGOOD",6)!=0) gintA[bin]->Draw("p");
+    if(strncmp(gintB[bin]->GetTitle(),"NOGOOD",6)!=0) gintB[bin]->Draw("p");
+    if(strncmp(gint[bin]->GetTitle(),"NOGOOD",6)!=0) gint[bin]->Draw("p");
+    TLegend * leg2 = new TLegend(0.2,0.2,0.4,0.35);
     leg2->SetTextFont(43);
     leg2->SetTextSize(20);
     leg2->SetFillColor(kWhite);
     leg2->SetBorderSize(0);
     if(strncmp(gint[bin]->GetTitle(),"Graph",5)!=0) {
-      leg2->AddEntry(gint[bin],gint[bin]->GetTitle(),"lp");
+      if(strncmp(gint[bin]->GetTitle(),"NOGOOD",6)!=0) leg2->AddEntry(gint[bin],gint[bin]->GetTitle(),"lp");
     } else {
-      leg2->AddEntry(gint[bin],"Adopted","lp");
+      if(strncmp(gint[bin]->GetTitle(),"NOGOOD",6)!=0)leg2->AddEntry(gint[bin],"Adopted","lp");
     }
     if(strncmp(gintA[bin]->GetTitle(),"Graph",5)!=0) {
-      leg2->AddEntry(gintA[bin],gintA[bin]->GetTitle(),"lp");
+      if(strncmp(gintA[bin]->GetTitle(),"NOGOOD",6)!=0) leg2->AddEntry(gintA[bin],gintA[bin]->GetTitle(),"lp");
     } else {
-      leg2->AddEntry(gintA[bin],"A side","lp");
+      if(strncmp(gintA[bin]->GetTitle(),"NOGOOD",6)!=0) leg2->AddEntry(gintA[bin],"A side","lp");
     }
     if(strncmp(gintB[bin]->GetTitle(),"Graph",5)!=0) {
-      leg2->AddEntry(gintB[bin],gintB[bin]->GetTitle(),"lp");
+      if(strncmp(gintB[bin]->GetTitle(),"NOGOOD",6)!=0) leg2->AddEntry(gintB[bin],gintB[bin]->GetTitle(),"lp");
     } else {
-      leg2->AddEntry(gintB[bin],"B side","lp");
+      if(strncmp(gintB[bin]->GetTitle(),"NOGOOD",6)!=0) leg2->AddEntry(gintB[bin],"B side","lp");
     }
 
 
     leg2->Draw();
-    TLatex * tl = new TLatex( -1,0.3*(ymax-ymin)+ymin,nl3.data());
+    TLatex * tl = new TLatex( -2,0.8*(ymax-ymin)+ymin,nl3.data());
     tl->Draw();
     if(ANALS[en][2]!="") {
       string tmp = ANALS[en][2];
       if(Decor) tmp+=" (EP Decorrelation corrected)";
-      TLatex * tl2 = new TLatex( -1,0.2*(ymax-ymin)+ymin,tmp.data());
+      TLatex * tl2 = new TLatex( -2,0.75*(ymax-ymin)+ymin,tmp.data());
       tl2->SetTextFont(43);
       tl2->SetTextSize(16);
       tl2->Draw();
