@@ -30,7 +30,10 @@ double centRefBins[50];
 int cbins = 0;
 int cmin[50];
 int cmax[50];
-
+TFile * tout;
+TDirectory * toutsub;
+TDirectory * toutsubsub;
+TDirectory * toutsubsubsub;
 string tag;
 bool SetToA = false;
 bool Decor;
@@ -225,6 +228,15 @@ void GetVNCreate(int replay , int bin , TGraphErrors * & gint, TGraphErrors * & 
     t3->SetTextFont(43);
     t3->SetTextSize(20);
     t3->Draw();
+    TDirectory * save = gDirectory;
+    toutsubsubsub->cd();
+    h->Write();
+    g->Write();
+    gA->Write();
+    gB->Write();
+    c->Write();
+    save->cd();
+
     c->Print(Form("%s/%s.pdf",FigSubSubDir.data(), cname.data()),"pdf");
   }
   fout = fopen(Form("%s/data/%s.dat",FigSubSubDir.data(),cname.data()),"w");
@@ -269,6 +281,8 @@ void GetVN(string rootfile = "../MH.root", string name="N2SUB3",  double mineta 
   rootFile = rootfile;
   SetTracking();
   tag = rootfile.substr(rootfile.find("/")+1,rootfile.find(".root")-rootfile.find("/")-1);
+  string outname = tag+"_hists.root";
+  tout = new TFile(outname.data(),"UPDATE");
   TGraphErrors * gint[cbins];
   TGraphErrors * gintA[cbins];
   TGraphErrors * gintB[cbins];
@@ -327,17 +341,38 @@ void GetVN(string rootfile = "../MH.root", string name="N2SUB3",  double mineta 
     system(Form("mkdir %s",FigDir.data()));
   }
   FigSubDir = FigDir+"/"+name.data();
+ 
   if((ftest=fopen(FigSubDir.data(),"r"))==NULL) {
     system(Form("mkdir %s",FigSubDir.data()));
+
   } else {
     cout<<"Directory "<<FigSubDir.data()<<" exists.  Will overwrite."<<endl;
     fclose(ftest);
   }
+    toutsub = tout->mkdir(name.data());
+    if(toutsub==0) toutsub=(TDirectory *) tout->Get(name.data());
   TCanvas * ceta[cbins];
   timer->Start();
+  toutsubsub = toutsub->mkdir(Form("%d_%d",(int) (10*EtaMin),(int)(10*EtaMax)));
+  if(toutsubsub==0) toutsubsub=(TDirectory *) toutsub->Get(Form("%d_%d",(int) (10*EtaMin),(int)(10*EtaMax)));
+  FigSubSubDir = FigSubDir+Form("/eta_%04.1f_%04.1f",EtaMin,EtaMax);
+  if(Decor) FigSubSubDir+="_decor";
+  if((ftest=fopen(FigSubSubDir.data(),"r"))==NULL) {
+    system(Form("mkdir %s",FigSubSubDir.data()));
+    system(Form("mkdir %s/data",FigSubSubDir.data()));
+    system(Form("touch %s/data/integral.dat",FigSubSubDir.data()));
+    soutint = Form("%s/data/integral.dat",FigSubSubDir.data());
+  } else {
+    soutint = Form("%s/data/integral.dat",FigSubSubDir.data());
+    fclose(ftest);
+  }
+
   for(int bin = 0; bin<cbins; bin++) {
     timer->Stop();
     if(selbin>=0 && bin!=selbin) continue;
+    toutsubsubsub = toutsubsub->mkdir(Form("%d_%d",(int) (cmin[bin]),(int)(cmax[bin])));
+    if(toutsubsubsub==0) toutsubsubsub=(TDirectory *) toutsubsub->Get(Form("%d_%d",(int) (cmin[bin]),(int)(cmax[bin])));
+    cout<<"toutsubsubsub make: "<<toutsubsubsub<<endl;
     int minb = rcnt->FindBin(cmin[bin]);
     int maxb = rcnt->FindBin(cmax[bin])-1;
     if(maxb<minb) maxb=minb;
@@ -347,17 +382,6 @@ void GetVN(string rootfile = "../MH.root", string name="N2SUB3",  double mineta 
     timer->Start();
     if(cnt<5000) continue;
     //pt distribution
-    FigSubSubDir = FigSubDir+Form("/eta_%04.1f_%04.1f",EtaMin,EtaMax);
-    if(Decor) FigSubSubDir+="_decor";
-    if((ftest=fopen(FigSubSubDir.data(),"r"))==NULL) {
-      system(Form("mkdir %s",FigSubSubDir.data()));
-      system(Form("mkdir %s/data",FigSubSubDir.data()));
-      system(Form("touch %s/data/integral.dat",FigSubSubDir.data()));
-      soutint = Form("%s/data/integral.dat",FigSubSubDir.data());
-    } else {
-      soutint = Form("%s/data/integral.dat",FigSubSubDir.data());
-      fclose(ftest);
-    }
     GetVNCreate(en,bin,gint[bin],gintA[bin],gintB[bin]);
     //eta distribution
     string FigEtaSubDir = FigSubDir;
@@ -437,6 +461,16 @@ void GetVN(string rootfile = "../MH.root", string name="N2SUB3",  double mineta 
       tl2->SetTextSize(16);
       tl2->Draw();
     }
+    TDirectory * save = gDirectory;
+    cout<<"toutsubsubsub: "<<toutsubsubsub<<endl;
+    toutsubsubsub->cd();
+    cout<<"heta: "<<heta<<endl;
+    heta->Write();
+    gint[bin]->Write();
+    gintA[bin]->Write();
+    gintB[bin]->Write();
+    ceta[bin]->Write();
+    save->cd();
     ceta[bin]->Print(Form("%s/%s.pdf",FigEtaSubDir.data(),ceta[bin]->GetName()),"pdf");
 
     // FILE * fint = fopen(Form("%s/data/%s.dat",FigEtaSubDir.data(),ceta[bin]->GetName()),"w");

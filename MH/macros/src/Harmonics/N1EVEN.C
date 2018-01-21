@@ -136,8 +136,12 @@ if(ANALS[nrep][0].find("MCp02")!=std::string::npos) {
   if(replay != N1EVENSUB3  && replay !=N1EVENSUB2){
     g = GetVNPt(replay,bin,epindx,eMin,eMax,gA, gB, gSpec, vint, vinte, vintA,vintAe,vintB,vintBe,false);
     g->SetTitle("NOGOOD");
-    gB->SetTitle("NOGOOD");
+    gB->SetTitle(lepB.data());
+    if(replay!=N1MCm22SUB2 && replay!=N1MCp22SUB2) gB->SetTitle("NOGOOD");
     gA->SetTitle(lepA.data());
+    g->SetName("g");
+    gA->SetName("gA");
+    gB->SetName("gB");
     ymin = setYmin(gA);
     ymax = setYmax(gA);
     fin->Close();
