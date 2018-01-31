@@ -12,36 +12,30 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
-class QWVectCounter : public edm::EDProducer {
+class QWIntProducer : public edm::EDProducer {
 public:
-	explicit QWVectCounter(const edm::ParameterSet&);
-	~QWVectCounter();
+	explicit QWIntProducer(const edm::ParameterSet&);
+	~QWIntProducer();
 
 private:
 	virtual void produce(edm::Event&, const edm::EventSetup&) override;
-	edm::InputTag	src_;
+	int	src_;
 };
 
-QWVectCounter::QWVectCounter(const edm::ParameterSet& pset) :
-	src_(pset.getUntrackedParameter<edm::InputTag>("src"))
+QWIntProducer::QWIntProducer(const edm::ParameterSet& pset) :
+	src_(pset.getUntrackedParameter<int>("src"))
 {
-	consumes<std::vector<double> >(src_);
 	produces<int>();
 }
 
-QWVectCounter::~QWVectCounter() {
+QWIntProducer::~QWIntProducer() {
 	return;
 }
 
-void QWVectCounter::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
+void QWIntProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-	using namespace edm;
-	using namespace reco;
-
-	Handle<std::vector<double> > vect;
-	iEvent.getByLabel(src_, vect);
-	int Noff = int(vect->size());
-	iEvent.put(std::make_unique<int>(Noff));
+	std::unique_ptr<int> pint(new int(src_));
+	iEvent.put(move(pint));
 }
 
-DEFINE_FWK_MODULE(QWVectCounter);
+DEFINE_FWK_MODULE(QWIntProducer);

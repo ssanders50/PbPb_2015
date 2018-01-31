@@ -14,7 +14,7 @@ public:
 	~QWPPRecoCentBinProducer();
 
 private:
-	virtual void beginRun(edm::Run const& run, const edm::EventSetup& iSetup) override;
+//	virtual void beginRun(edm::Run const& run, const edm::EventSetup& iSetup) override;
 	virtual void produce(edm::Event&, const edm::EventSetup&) override;
 
 };
@@ -22,6 +22,7 @@ private:
 QWPPRecoCentBinProducer::QWPPRecoCentBinProducer(const edm::ParameterSet& pset) {
 	consumes<CaloTowerCollection>(edm::InputTag("towerMaker"));
 	produces<int>();
+	produces<double>("etHFtowerSum");
 }
 
 QWPPRecoCentBinProducer::~QWPPRecoCentBinProducer()
@@ -29,9 +30,9 @@ QWPPRecoCentBinProducer::~QWPPRecoCentBinProducer()
 	return;
 }
 
-void QWPPRecoCentBinProducer::beginRun(edm::Run const& iRun, const edm::EventSetup& iSetup) {
-	return;
-}
+//void QWPPRecoCentBinProducer::beginRun(edm::Run const& iRun, const edm::EventSetup& iSetup) {
+//	return;
+//}
 
 void QWPPRecoCentBinProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 	using namespace edm;
@@ -62,8 +63,10 @@ void QWPPRecoCentBinProducer::produce(edm::Event& iEvent, const edm::EventSetup&
 		}
 	}
 
-	std::auto_ptr<int> binp(new int(bin));
-	iEvent.put(binp);
+	//std::auto_ptr<int> binp(new int(bin));
+	//std::auto_ptr<double> et(new double(etHFtowerSum));
+	iEvent.put(std::make_unique<int>(bin));
+	iEvent.put(std::make_unique<double>(etHFtowerSum), "etHFtowerSum");
 }
 
 DEFINE_FWK_MODULE(QWPPRecoCentBinProducer);
