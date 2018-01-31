@@ -123,7 +123,7 @@ private:
   bool CaloMatch(const reco::Track & track, const edm::Event & iEvent, unsigned int idx);
   // ----------member data ---------------------------
   int eporder_;
-
+  int mx;
   std::string centralityVariable_;
   std::string centralityLabel_;
   std::string centralityMC_;
@@ -131,6 +131,11 @@ private:
   edm::EDGetTokenT<int> centralityBinToken;
   edm::Handle<int> cbin_;
   edm::EDGetTokenT<int> tag_;
+
+  edm::InputTag bTag_;
+  edm::EDGetTokenT<double> bToken;
+  edm::Handle<double> b_;
+
   edm::InputTag centralityTag_;
   edm::EDGetTokenT<reco::Centrality> centralityToken;
   edm::Handle<reco::Centrality> centrality_;
@@ -151,9 +156,9 @@ private:
   edm::Handle<reco::EvtPlaneCollection> inputPlanes_;
 
   edm::Service<TFileService> fs;
-  TFile * frecenter;
+  TFile * frecenter=0;
   string offsetFileName;
-
+ 
   double caloCentRef_;
   double caloCentRefWidth_;
   int caloCentRefMinBin_;
@@ -165,6 +170,9 @@ private:
   float vzr_sell;
   float vzErr_sell;
   TH1D * hcent;
+  TH1D * hb;
+  TH1D * hvtx;
+  TH1D * hvtxRaw;
   TH1D * hcentbins;
   TH1D * hcentres;
   TH1D * hptNtrk;
@@ -221,6 +229,10 @@ private:
   int FlatOrder_;
   int NumFlatBins_;
   int CentBinCompression_;
+  int flatnvtxbins_;
+  double flatminvtx_;
+  double flatdelvtx_;
+  bool genMC_;
   int Noffmin_;
   int Noffmax_;
   TH2D * qxtrk[7];
@@ -245,8 +257,10 @@ private:
   bool Recenter_;
   int minrun_;
   int maxrun_;
-  TH2D * wqxtrkRef[7][40];
-  TH2D * wqytrkRef[7][40];
+  struct offsets {
+    TH2D * wqxtrkRef[7][40];
+    TH2D * wqytrkRef[7][40];
+  } offsets[12];
 
   int nCentBins_ = 1;
   int ntrack;
@@ -308,11 +322,12 @@ private:
   TH2D * Eff_10_30;
   TH2D * Eff_30_50;
   TH2D * Eff_50_100;
-  enum    TrackCut {trackUndefine = 0, ppReco = 1, HIReco, Pixel};
+  enum    TrackCut {trackUndefine = 0, ppReco = 1, HIReco, Pixel, GenMC};
   TrackCut sTrackQuality;
   bool TrackQuality_ppReco(const reco::TrackCollection::const_iterator&, const reco::VertexCollection&);
   bool TrackQuality_HIReco(const reco::TrackCollection::const_iterator&, const reco::VertexCollection&);
   bool TrackQuality_Pixel(const reco::TrackCollection::const_iterator&, const reco::VertexCollection&);
+  bool TrackQuality_GenMC(const reco::TrackCollection::const_iterator&, const reco::VertexCollection&);
 
 
   TRandom * ran;
@@ -358,6 +373,7 @@ private:
       if ( sTrackQuality == HIReco and not TrackQuality_HIReco(itTrack, recoVertices) ) continue;
       else if ( sTrackQuality == ppReco and not TrackQuality_ppReco(itTrack, recoVertices) ) continue;
       else if ( sTrackQuality == Pixel  and not TrackQuality_Pixel (itTrack, recoVertices) ) continue;
+      else if ( sTrackQuality == GenMC  and not TrackQuality_GenMC (itTrack, recoVertices) ) continue;
       
       if( itTrack->pt() < 0.4 ) continue;
       ++N;
@@ -398,16 +414,19 @@ private:
     }
           
     vtx = recoVertices[primaryvtx].z();
+    hvtxRaw->Fill(vtx);
+
     if (fabs(vtx) < minvz_ || fabs(vtx) > maxvz_) {
       return -1;
     }        
     
     iEvent.getByLabel(trackTag_,trackCollection_);
-
+    int k = (vtx-flatminvtx_)/flatdelvtx_;
     for(TrackCollection::const_iterator itTrack = trackCollection_->begin(); itTrack != trackCollection_->end(); ++itTrack) { 
       if ( sTrackQuality == HIReco and not TrackQuality_HIReco(itTrack, recoVertices) ) continue;
       else if ( sTrackQuality == ppReco and not TrackQuality_ppReco(itTrack, recoVertices) ) continue;
       else if ( sTrackQuality == Pixel  and not TrackQuality_Pixel (itTrack, recoVertices) ) continue;
+      else if ( sTrackQuality == GenMC  and not TrackQuality_GenMC (itTrack, recoVertices) ) continue;
  
       int ipt = qxtrk[0]->GetXaxis()->FindBin(itTrack->pt());
       int ieta = qxtrk[0]->GetYaxis()->FindBin(itTrack->eta());
@@ -423,13 +442,14 @@ private:
 	if(eff == 0) eff = 1;
 	eff=1/eff;
       }
-      for(int iorder = 1; iorder <=7; iorder++) {
-	qxtrk[iorder-1]->Fill(itTrack->pt(), itTrack->eta(), eff*(TMath::Cos(iorder*itTrack->phi()) - wqxtrkRef[iorder-1][bin]->GetBinContent(ipt,ieta)));
-	qytrk[iorder-1]->Fill(itTrack->pt(), itTrack->eta(), eff*(TMath::Sin(iorder*itTrack->phi()) - wqytrkRef[iorder-1][bin]->GetBinContent(ipt,ieta)));
+      if(k>=0&&k<flatnvtxbins_) {
+	for(int iorder = 1; iorder <=7; iorder++) {
+	  qxtrk[iorder-1]->Fill(itTrack->pt(), itTrack->eta(), eff*(TMath::Cos(iorder*itTrack->phi()) - offsets[k].wqxtrkRef[iorder-1][bin]->GetBinContent(ipt,ieta)));
+	  qytrk[iorder-1]->Fill(itTrack->pt(), itTrack->eta(), eff*(TMath::Sin(iorder*itTrack->phi()) - offsets[k].wqytrkRef[iorder-1][bin]->GetBinContent(ipt,ieta)));
+	}
+	qcnt->Fill(itTrack->pt(), itTrack->eta(), eff);
+	avpt->Fill(itTrack->pt(), itTrack->eta(), eff*itTrack->pt());
       }
-      qcnt->Fill(itTrack->pt(), itTrack->eta(), eff);
-      avpt->Fill(itTrack->pt(), itTrack->eta(), eff*itTrack->pt());
-      
       if( itTrack->pt() < 0.2 ) continue;
       ++Ntrk;
     }
@@ -470,6 +490,9 @@ VNAnalyzer::VNAnalyzer(const edm::ParameterSet& iConfig):runno_(0)
 
   centralityBinTag_ = iConfig.getParameter<edm::InputTag>("centralityBinTag_");
   centralityBinToken = consumes<int>(centralityBinTag_);
+
+  bTag_ = iConfig.getParameter<edm::InputTag>("bTag_");
+  bToken = consumes<double>(bTag_);
 
   centralityTag_ = iConfig.getParameter<edm::InputTag>("centralityTag_");
   centralityToken = consumes<reco::Centrality>(centralityTag_);
@@ -517,6 +540,10 @@ VNAnalyzer::VNAnalyzer(const edm::ParameterSet& iConfig):runno_(0)
   caloCentRef_ = iConfig.getUntrackedParameter<double>("caloCentRef_",80.);
   caloCentRefWidth_ = iConfig.getUntrackedParameter<double>("caloCentRefWidth_",5.);
   CentBinCompression_ = iConfig.getUntrackedParameter<int>("CentBinCompression_",5);
+  flatnvtxbins_ = iConfig.getParameter<int>("flatnvtxbins") ;
+  flatminvtx_ = iConfig.getParameter<double>("flatminvtx") ;
+  flatdelvtx_ = iConfig.getParameter<double>("flatdelvtx") ;
+  genMC_ = iConfig.getUntrackedParameter<bool>("genMC",false);
   Noffmin_ = iConfig.getUntrackedParameter<int>("Noffmin_", 0);
   Noffmax_ = iConfig.getUntrackedParameter<int>("Noffmax_", 50000);	
   minrun_ = iConfig.getUntrackedParameter<int>("minrun_", 0);
@@ -543,19 +570,18 @@ VNAnalyzer::VNAnalyzer(const edm::ParameterSet& iConfig):runno_(0)
   minvz_ = iConfig.getUntrackedParameter<double>("minvz_", -15.);
   maxvz_ = iConfig.getUntrackedParameter<double>("maxvz_", 15.);
   offsetFileName = iConfig.getUntrackedParameter<std::string>("offsetFile");
-  frecenter = new TFile(offsetFileName.data(),"read");
-  int mx = ntrkbins;
+  if(!genMC_ && offsetFileName.length()!=std::string::npos) {
+    frecenter = new TFile(offsetFileName.data(),"read");
+  }  else { 
+    Recenter_ = false;
+  }
+  mx = ntrkbins;
   if(!useNtrk_) {
     mx = ncentbins;
   }
-  for(int i = 0; i<mx; i++) {
-    for(int j = 1; j<=7; j++){
-      wqxtrkRef[j-1][i] = (TH2D *) frecenter->Get(Form("wqxtrk_%d_%d",j,i));
-      wqytrkRef[j-1][i] = (TH2D *) frecenter->Get(Form("wqytrk_%d_%d",j,i));
-    }
-  }
-
+  
   std::cout<<"==============================================="<<std::endl;
+  if(genMC_) std::cout<<"Generator MC Replay"<<std::endl;
   std::cout<<"centralityBinTag_           "<<centralityBinTag_.encode()<<std::endl;
   std::cout<<"centralityTag_              "<<centralityTag_.encode()<<std::endl;
   std::cout<<"vertexTag_                  "<<vertexTag_.encode()<<std::endl;
@@ -563,6 +589,9 @@ VNAnalyzer::VNAnalyzer(const edm::ParameterSet& iConfig):runno_(0)
   std::cout<<"inputPlanesTag_             "<<inputPlanesTag_.encode()<<std::endl;
   std::cout<<"FlatOrder_                  "<<FlatOrder_<<std::endl;
   std::cout<<"NumFlatBins_                "<<NumFlatBins_<<std::endl;
+  std::cout<<"flatnvtxbins_               "<<flatnvtxbins_<<std::endl;
+  std::cout<<"flatminvtx_                 "<<flatminvtx_<<std::endl;
+  std::cout<<"flatdelvtx_                 "<<flatdelvtx_<<std::endl;
   std::cout<<"caloCentRef_                "<<caloCentRef_<<std::endl;
   std::cout<<"caloCentRefWidth_           "<<caloCentRefWidth_<<std::endl;
   std::cout<<"CentBinCompression_         "<<CentBinCompression_<<std::endl;
@@ -605,6 +634,12 @@ VNAnalyzer::VNAnalyzer(const edm::ParameterSet& iConfig):runno_(0)
   conddir.make<TH1I>(note_FlatOrder.data(), note_FlatOrder.data(),1,0,1);
   string note_NumFlatBins = Form("NumFlatBins_%d",NumFlatBins_);
   conddir.make<TH1I>(note_NumFlatBins.data(), note_NumFlatBins.data(),1,0,1);
+  string note_flatnvtxbins = Form("flatnvtxbins_%d",flatnvtxbins_);
+  conddir.make<TH1I>(note_flatnvtxbins.data(), note_flatnvtxbins.data(),1,0,1);
+  string note_flatminvtx = Form("flatminvtx_%07.2f",flatminvtx_);
+  conddir.make<TH1I>(note_flatminvtx.data(), note_flatminvtx.data(),1,0,1);
+  string note_flatdelvtx = Form("flatdelvtx_%07.2f",flatdelvtx_);
+  conddir.make<TH1I>(note_flatdelvtx.data(), note_flatdelvtx.data(),1,0,1);
   string note_caloCentRef = Form("caloCentRef_%d",(int)caloCentRef_);
   conddir.make<TH1I>(note_caloCentRef.data(), note_caloCentRef.data(),1,0,1);
   string note_caloCentRefWidth = Form("caloCentRefWidth_%d",(int)caloCentRefWidth_);
@@ -650,8 +685,14 @@ VNAnalyzer::VNAnalyzer(const edm::ParameterSet& iConfig):runno_(0)
     qytrk[iorder-1]->SetOption("colz");
     qxtrk[iorder-1]->Sumw2();
     qytrk[iorder-1]->Sumw2();
+    qxtrk[iorder-1]->SetXTitle("p_{T} (GeV/c");
+    qxtrk[iorder-1]->SetYTitle(Form("#eta (n=%d)",iorder));
+    qytrk[iorder-1]->SetXTitle("p_{T} (GeV/c");
+    qytrk[iorder-1]->SetYTitle(Form("#eta (n=%d)",iorder));
   }
   qcnt =  fs->make<TH2D>("qcnt", "qcnt",npt,ptbins, netabinsDefault, etabinsDefault);
+  qcnt->SetXTitle("p_{T} (GeV/c");
+  qcnt->SetYTitle("#eta");
   avpt =  fs->make<TH2D>("avpt","avpt",npt,ptbins, netabinsDefault, etabinsDefault);
   qcnt->SetOption("colz");
   avpt->SetOption("colz");
@@ -660,8 +701,35 @@ VNAnalyzer::VNAnalyzer(const edm::ParameterSet& iConfig):runno_(0)
   hTemplate = (TH2D *) qcnt->Clone("hTemplate");
   hTemplate->SetDirectory(0);
   hTemplate->Reset();
-
+  if(!GenMC) {
+    for(int i = 0; i<mx; i++) {
+      for(int j = 1; j<=7; j++){
+	for(int k = 0; k<flatnvtxbins_; k++) {
+	  offsets[k].wqxtrkRef[j-1][i] = (TH2D *) frecenter->Get(Form("wqxtrk_%d_%d_%d",j,k,i));
+	  offsets[k].wqytrkRef[j-1][i] = (TH2D *) frecenter->Get(Form("wqytrk_%d_%d_%d",j,k,i));
+	  offsets[k].wqxtrkRef[j-1][i]->SetDirectory(0);
+	  offsets[k].wqytrkRef[j-1][i]->SetDirectory(0);
+	}
+      }
+    }
+  } else {
+    for(int i = 0; i<mx; i++) {
+      for(int j = 1; j<=7; j++){
+	for(int k = 0; k<flatnvtxbins_; k++) {
+	  offsets[k].wqxtrkRef[j-1][i] = (TH2D *) hTemplate->Clone(Form("wqxtrk_%d_%d_%d",j,k,i));
+	  offsets[k].wqytrkRef[j-1][i] = (TH2D *) hTemplate->Clone(Form("wqytrk_%d_%d_%d",j,k,i));
+	  offsets[k].wqxtrkRef[j-1][i]->Reset();
+	  offsets[k].wqytrkRef[j-1][i]->Reset();
+	  offsets[k].wqxtrkRef[j-1][i]->SetDirectory(0);
+	  offsets[k].wqytrkRef[j-1][i]->SetDirectory(0);
+	}
+      }
+    }
+  }
   hcent = fs->make<TH1D>("cent","cent",220,-10,110);
+  hvtx = fs->make<TH1D>("vtx","vtx",600,-30,30);
+  hvtxRaw = fs->make<TH1D>("vtxRaw","vtxRaw",600,-30,30);
+  hb = fs->make<TH1D>("b","b",10000,0,10000);
   hcentbins = fs->make<TH1D>("centbins","centbins",201,0,200);
   if(useNtrk_) {
     hcentres = fs->make<TH1D>("centres","centres",ntrkbins,trkBins);
@@ -683,7 +751,7 @@ VNAnalyzer::VNAnalyzer(const edm::ParameterSet& iConfig):runno_(0)
     if(i>0) epnames = epnames + ":" + EPNames[i].data() + "/D";
     TFileDirectory subdir = fs->mkdir(Form("%s",EPNames[i].data()));
     flat[i] = new HiEvtPlaneFlatten();
-    flat[i]->init(FlatOrder_,NumFlatBins_,EPNames[i],EPOrder[i]);
+    flat[i]->init(FlatOrder_,NumFlatBins_,flatnvtxbins_,flatminvtx_,flatdelvtx_,EPNames[i],EPOrder[i]);
     Double_t psirange = 4;
     if(EPOrder[i]==1 ) psirange = 3.5;
     if(EPOrder[i]==2 ) psirange = 2;
@@ -743,7 +811,6 @@ VNAnalyzer::VNAnalyzer(const edm::ParameterSet& iConfig):runno_(0)
   } else {
     nanalbins = ncentbins;
   }
-
   //==============   Resolution terms  ========
   TFileDirectory resdir = fs->mkdir("Resolutions");
   for(int i = 0; i<nanalbins; i++) {
@@ -794,7 +861,6 @@ VNAnalyzer::VNAnalyzer(const edm::ParameterSet& iConfig):runno_(0)
     res23->GetXaxis()->SetTitle("n = 2");
   }
 
-
   for(int i = 0; i<nanalbins; i++) {
 
     TFileDirectory subdir;
@@ -825,7 +891,6 @@ VNAnalyzer::VNAnalyzer(const edm::ParameterSet& iConfig):runno_(0)
     ptcnt[i]->SetOption("colz");
     badcnt[i]->SetOption("colz");
     qxycnt[i]->SetOption("colz");
-
     for(int ian = 0; ian<nanals; ian++) {
       TFileDirectory andir = subdir.mkdir(AnalNames[ian].data());
       
@@ -877,8 +942,6 @@ VNAnalyzer::VNAnalyzer(const edm::ParameterSet& iConfig):runno_(0)
     }
   }
   //==============================
-  
-  
   if(makeTree_) {
     tree = fs->make<TTree>("tree","EP tree");
     tree->Branch("Cent",&centval,"cent/D");
@@ -914,12 +977,13 @@ VNAnalyzer::VNAnalyzer(const edm::ParameterSet& iConfig):runno_(0)
     tree->Branch("qcnt",    "TH2D",  &qcnt, 128000, 0);
     tree->Branch("avpt",    "TH2D",  &avpt, 128000, 0);
   }
+  
 }
 
 
 VNAnalyzer::~VNAnalyzer()
 {
-  frecenter->Close();  
+  if(frecenter!=NULL) frecenter->Close();  
   // do anything here that needs to be done at desctruction time
   // (e.g. close files, deallocate resources etc.)
 }
@@ -936,6 +1000,7 @@ VNAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   using namespace edm;
   using namespace std;
   using namespace reco;
+  
   Bool_t newrun = kFALSE;
   if(runno_ != iEvent.id().run()) newrun = kTRUE;
   runno_ = iEvent.id().run();
@@ -946,53 +1011,47 @@ VNAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     //
     //Get Size of Centrality Table
     //
-    if(!useNtrk_) {
+    nCentBins_ = 200;
+    if(!useNtrk_ && !genMC_) {
       edm::ESHandle<CentralityTable> centDB_;
       iSetup.get<HeavyIonRcd>().get(centralityLabel_,centDB_);
       nCentBins_ = (int) centDB_->m_table.size();
       for(int i = 0; i<NumEPNames; i++) {
-	flat[i]->setCaloCentRefBins(-1,-1);
-	if(caloCentRef_>0) {
-	  int minbin = (caloCentRef_-caloCentRefWidth_/2.)*nCentBins_/100.;
-	  int maxbin = (caloCentRef_+caloCentRefWidth_/2.)*nCentBins_/100.;
-	  minbin/=CentBinCompression_;
-	  maxbin/=CentBinCompression_;
-	  if(minbin>0 && maxbin>=minbin) {
-	    if(EPDet[i]==HF || EPDet[i]==Castor) flat[i]->setCaloCentRefBins(minbin,maxbin);
-	  }
-	}
+    	flat[i]->setCaloCentRefBins(-1,-1);
+    	if(caloCentRef_>0) {
+    	  int minbin = (caloCentRef_-caloCentRefWidth_/2.)*nCentBins_/100.;
+    	  int maxbin = (caloCentRef_+caloCentRefWidth_/2.)*nCentBins_/100.;
+    	  minbin/=CentBinCompression_;
+    	  maxbin/=CentBinCompression_;
+    	  if(minbin>0 && maxbin>=minbin) {
+    	    if(EPDet[i]==HF || EPDet[i]==Castor) flat[i]->setCaloCentRefBins(minbin,maxbin);
+    	  }
+    	}
       }
     }
     //
     // Get flattening parameter file.  
     //
-    edm::ESHandle<RPFlatParams> flatparmsDB_;
-    iSetup.get<HeavyIonRPRcd>().get(flatparmsDB_);
-    LoadEPDB * db = new LoadEPDB(flatparmsDB_,flat);
-    if(!db->IsSuccess()) {
-      std::cout<<"Flattening db inconsistancy, will continue without: "<<std::endl;
-      loadDB_ = kFALSE;
-    }        
+    if(!genMC_) {
+      edm::ESHandle<RPFlatParams> flatparmsDB_;
+      iSetup.get<HeavyIonRPRcd>().get(flatparmsDB_);
+      LoadEPDB * db = new LoadEPDB(flatparmsDB_,flat);
+      if(!db->IsSuccess()) {
+	std::cout<<"Flattening db inconsistancy, will continue without: "<<std::endl;
+	loadDB_ = kFALSE;
+      }        
+    }
   } //First event
-  
   
   //
   // Get Centrality
   //
 
   int Noff=0;
-  
+ 
   int bin = 0;
   int cbin = 0;
   if(!useNtrk_) {
-    // ntrkval=0;
-    // if(Noffmin_>=0) {
-    //   iEvent.getByToken(centralityToken, centrality_);
-    //   ntrkval = centrality_->Ntracks();
-    //   if ( (ntrkval < Noffmin_) || (ntrkval >= Noffmax_) ) {
-    // 	return;
-    //   }
-    // }
     Noff = getNoff(iEvent,iSetup);
     hNoff->Fill(Noff);
     iEvent.getByToken(centralityBinToken, cbin_);
@@ -1016,12 +1075,17 @@ VNAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   int ibin = hcentres->FindBin(centval)-1;
   hcent->Fill(centval);
   hcentbins->Fill(cbin);
-  
-  if (fabs(vtx) < minvz_ || fabs(vtx) > maxvz_) return;
-  
+  double b;
+  if(genMC_) {
+    iEvent.getByToken(bToken, b_);
+    b = *b_;     
+    hb->Fill(500.*b);
+
+  } 
   int ntrkval=fillTracks(iEvent, iSetup, ibin);
+  if(ntrkval<=0) return;
+  hvtx->Fill(vtx);
   hNtrk->Fill(ntrkval);
-  
   //
   // Get Event Planes
   //
@@ -1211,7 +1275,6 @@ VNAnalyzer::beginJob()
 // ------------ method called once each job just after ending the event loop  ------------
 void 
 VNAnalyzer::endJob() {
-  
 }
 bool
 VNAnalyzer::CaloMatch(const reco::Track & track, const edm::Event & iEvent, unsigned int idx)
@@ -1355,6 +1418,15 @@ VNAnalyzer::TrackQuality_Pixel(const reco::TrackCollection::const_iterator& itTr
   }
   return true;
 }
+///
+bool
+VNAnalyzer::TrackQuality_GenMC(const reco::TrackCollection::const_iterator& itTrack, const reco::VertexCollection& recoVertices)
+{
+	if ( itTrack->charge() == 0 ) return false;
+	if( fabs(itTrack->eta())>2.4  )return false;
+	return true;
+}
+
 
 //define this as a plug-in
 DEFINE_FWK_MODULE(VNAnalyzer);
