@@ -182,6 +182,9 @@ private:
   int FlatOrder_;
   int NumFlatBins_;
   int CentBinCompression_;
+  int flatnvtxbins_;
+  double flatminvtx_;
+  double flatdelvtx_;
   int Noffmin_;
   int Noffmax_;
 
@@ -369,6 +372,10 @@ CheckFlattening::CheckFlattening(const edm::ParameterSet& iConfig):runno_(0)
   CentBinCompression_ = iConfig.getParameter<int>("CentBinCompression_");
   caloCentRef_ = iConfig.getParameter<double>("caloCentRef_");
   caloCentRefWidth_ = iConfig.getParameter<double>("caloCentRefWidth_");
+  flatnvtxbins_ = iConfig.getParameter<int>("flatnvtxbins") ;
+  flatminvtx_ = iConfig.getParameter<double>("flatminvtx") ;
+  flatdelvtx_ = iConfig.getParameter<double>("flatdelvtx") ;
+
   useNtrk_ = iConfig.getUntrackedParameter<bool>("useNtrk",false);
   if(useNtrk_) {
     NumFlatBins_ = ntrkbins;
@@ -438,7 +445,7 @@ CheckFlattening::CheckFlattening(const edm::ParameterSet& iConfig):runno_(0)
 
     NumFlatBins_ = ntrkbins;
     flat[i] = new HiEvtPlaneFlatten();
-    flat[i]->init(FlatOrder_,NumFlatBins_,EPNames[i],EPOrder[i]);
+    flat[i]->init(FlatOrder_,NumFlatBins_,flatnvtxbins_,flatminvtx_,flatdelvtx_,EPNames[i],EPOrder[i]);
 
   }
   std::cout<<"Hbins: "<<flat[0]->getHBins()<<std::endl;

@@ -94,6 +94,10 @@ private:
   edm::EDGetTokenT<int> centralityBinToken;
   edm::Handle<int> cbin_;
   
+  edm::InputTag bTag_;
+  edm::EDGetTokenT<double> bToken;
+  edm::Handle<double> b_;
+
   edm::InputTag centralityTag_;
   edm::EDGetTokenT<reco::Centrality> centralityToken;
   edm::Handle<reco::Centrality> centrality_;
@@ -138,10 +142,12 @@ private:
   double effm_;
   double minpt_;
   double maxpt_;
-  double minvtx_;
-  double maxvtx_;
-  double delvtx_;
-  //double dzerr_;
+   int flatnvtxbins_;
+  double flatminvtx_;
+  double flatmaxvtx_;
+  double flatdelvtx_;
+  bool genMC_;
+ //double dzerr_;
   double chi2_;
   bool FirstEvent;
   int FlatOrder_;
@@ -168,16 +174,20 @@ private:
   TH1D * hNtrkoff;
   TH1D * htrkbins;
   TH1D * hcent;
+  TH1D * hb;
   TH1D * hcentbins;
   TH1D * hflatbins;
   TH1D * hptspec;
   TH2F * hpt;
   TH2F * hpt2;
   TH2F * hptcnt;
-  TH2D * wqxtrk[7][ntrkbins];
-  TH2D * wqytrk[7][ntrkbins];
-  TH2D * wqcnt[ntrkbins];
-  
+
+  struct offstruct{
+    TH2D * wqxtrk[7][ntrkbins];
+    TH2D * wqytrk[7][ntrkbins];
+    TH2D * wqcnt[ntrkbins];
+  } offstruct[12];
+
   //TH2D * hcastor;
   float ws[NumEPNames];
   float wc[NumEPNames];
@@ -236,7 +246,10 @@ EvtPlaneCalibTree::EvtPlaneCalibTree(const edm::ParameterSet& iConfig) {
   
   centralityBinTag_ = iConfig.getParameter<edm::InputTag>("centralityBinTag_");
   centralityBinToken = consumes<int>(centralityBinTag_);
-  
+ 
+  bTag_ = iConfig.getParameter<edm::InputTag>("bTag_");
+  bToken = consumes<double>(bTag_);
+ 
   centralityTag_ = iConfig.getParameter<edm::InputTag>("centralityTag_");
   centralityToken = consumes<reco::Centrality>(centralityTag_);
   
@@ -283,9 +296,10 @@ EvtPlaneCalibTree::EvtPlaneCalibTree(const edm::ParameterSet& iConfig) {
   effm_ = iConfig.getUntrackedParameter<double>("effm_",0.0);
   minpt_ = iConfig.getUntrackedParameter<double>("minpt_",0.3);
   maxpt_ = iConfig.getUntrackedParameter<double>("maxpt_",3.0);
-  minvtx_ = iConfig.getUntrackedParameter<double>("minvtx_",-25.);
-  maxvtx_ = iConfig.getUntrackedParameter<double>("maxvtx_",25.);
-  delvtx_ = iConfig.getUntrackedParameter<double>("delvtx_",5.);
+  flatnvtxbins_ = iConfig.getParameter<int>("flatnvtxbins") ;
+  genMC_ = iConfig.getUntrackedParameter<bool>("genMC",false);
+  flatminvtx_ = iConfig.getParameter<double>("flatminvtx") ;
+  flatdelvtx_ = iConfig.getParameter<double>("flatdelvtx") ;
   chi2_  = iConfig.getUntrackedParameter<double>("chi2_",200.);
   dzdzerror_ = iConfig.getUntrackedParameter<double>("dzdzerror", 3.);
   d0d0error_ = iConfig.getUntrackedParameter<double>("d0d0error", 3.);
@@ -295,6 +309,7 @@ EvtPlaneCalibTree::EvtPlaneCalibTree(const edm::ParameterSet& iConfig) {
   
   FirstEvent = kTRUE;
   hcent = fs->make<TH1D>("cent","cent",101,0,100);
+  hb = fs->make<TH1D>("b","b",10000,0,10000);
   hcentbins = fs->make<TH1D>("centbins","centbins",ncentbins,centbins);
   hflatbins = fs->make<TH1D>("flatbins","flatbins",100,0,100);
   htrkbins = fs->make<TH1D>("trkbins","trkbins",ntrkbins,trkbins);
@@ -306,9 +321,10 @@ EvtPlaneCalibTree::EvtPlaneCalibTree(const edm::ParameterSet& iConfig) {
   TString epnamesI = EPNames[0].data();
   epnamesI = epnamesI+"/I";
   for(int i = 0; i<NumEPNames; i++) if(i>0) epnamesI = epnamesI + ":" + EPNames[i].data() + "/I";  
-  
+  flatmaxvtx_ = flatminvtx_ + flatnvtxbins_*flatdelvtx_;
   
   cout<<"=========================="<<endl;
+  if(genMC_) std::cout<<"Generator MC Replay"<<std::endl;
   cout<<"EvtPlaneProducer:         "<<endl;
   cout<<"  NumFlatBins_:           "<<NumFlatBins_<<endl;
   cout<<"  CentBinCompression_:    "<<CentBinCompression_<<endl;
@@ -316,9 +332,10 @@ EvtPlaneCalibTree::EvtPlaneCalibTree(const edm::ParameterSet& iConfig) {
   cout<<"  maxet_:                 "<<maxet_<<endl;
   cout<<"  minpt_:                 "<<minpt_<<endl;
   cout<<"  maxpt_:                 "<<maxpt_<<endl; 
-  cout<<"  minvtx_:                "<<minvtx_<<endl;
-  cout<<"  maxvtx_:                "<<maxvtx_<<endl;
-  cout<<"  delvtx_:                "<<delvtx_<<endl;
+  cout<<"  flatnvtxbins_:          "<<flatnvtxbins_<<endl;
+  cout<<"  flatminvtx_:            "<<flatminvtx_<<endl;
+  cout<<"  flatmaxvtx_:            "<<flatmaxvtx_<<endl;
+  cout<<"  flatdelvtx_:            "<<flatdelvtx_<<endl;
   cout<<"  dzdzerror_:             "<<dzdzerror_<<endl;
   cout<<"  d0d0error_:             "<<d0d0error_<<endl;
   cout<<"  pterrorpt_:             "<<pterrorpt_<<endl;
@@ -330,12 +347,9 @@ EvtPlaneCalibTree::EvtPlaneCalibTree(const edm::ParameterSet& iConfig) {
   fparams = fs->make<TH1D>("fparams","fparams",10,0,10);
   iparams = fs->make<TH1I>("iparams","iparams",10,0,10);
   hNtrkoff = fs->make<TH1D>("Ntrkoff","Ntrkoff",1001,0,3000);
-  int nvtxbins = (maxvtx_ - minvtx_)/delvtx_ + 0.1;
-  
-  
-  hpt    = fs->make<TH2F>("hpt",   "hpt",   NumFlatBins_,0,NumFlatBins_,nvtxbins,minvtx_,maxvtx_);
-  hpt2   = fs->make<TH2F>("hpt2",  "hpt2",  NumFlatBins_,0,NumFlatBins_,nvtxbins,minvtx_,maxvtx_);
-  hptcnt = fs->make<TH2F>("hptcnt","hptcnt",NumFlatBins_,0,NumFlatBins_,nvtxbins,minvtx_,maxvtx_);
+  hpt    = fs->make<TH2F>("hpt",   "hpt",   NumFlatBins_,0,NumFlatBins_,flatnvtxbins_,flatminvtx_,flatmaxvtx_);
+  hpt2   = fs->make<TH2F>("hpt2",  "hpt2",  NumFlatBins_,0,NumFlatBins_,flatnvtxbins_,flatminvtx_,flatmaxvtx_);
+  hptcnt = fs->make<TH2F>("hptcnt","hptcnt",NumFlatBins_,0,NumFlatBins_,flatnvtxbins_,flatminvtx_,flatmaxvtx_);
   int nbins = ntrkbins;
   if( !useNtrk_) nbins = ncentbins;
   TFileDirectory subdir;
@@ -345,32 +359,36 @@ EvtPlaneCalibTree::EvtPlaneCalibTree(const edm::ParameterSet& iConfig) {
     } else {
       subdir = fs->mkdir(Form("%d_%d",(int)centbins[i],(int)centbins[i+1]));
     }
-    wqcnt[i]   = subdir.make<TH2D>(Form("wqcnt_%d"  ,i),Form("wqcnt_%d"  ,i),nptbins,ptbins, netabins, etabins);
-    wqcnt[i]->SetOption("colz");
-    wqcnt[i]->SetXTitle("p_{T} (GeV/c)");
-    wqcnt[i]->SetYTitle("#eta");
-    for(int j = 0; j<7; j++) {
-      wqxtrk[j][i] = subdir.make<TH2D>(Form("wqxtrk%d_%d",j+1,i),Form("wqxtrk%d_%d",j+1,i),nptbins,ptbins, netabins, etabins);
-      wqytrk[j][i] = subdir.make<TH2D>(Form("wqytrk%d_%d",j+1,i),Form("wqytrk%d_%d",j+1,i),nptbins,ptbins, netabins, etabins);
-      wqxtrk[j][i]->SetOption("colz");
-      wqytrk[j][i]->SetOption("colz");
-      wqxtrk[j][i]->SetXTitle("p_{T} (GeV/c)");
-      wqxtrk[j][i]->SetYTitle("#eta");
-      wqytrk[j][i]->SetXTitle("p_{T} (GeV/c)");
-      wqytrk[j][i]->SetYTitle("#eta");
+    for(int k = 0; k<flatnvtxbins_; k++) {
+      offstruct[k].wqcnt[i]   = subdir.make<TH2D>(Form("wqcnt_%d_%d"  ,k,i),Form("wqcnt_%d_%d"  ,k,i),nptbins,ptbins, netabins, etabins);
+      offstruct[k].wqcnt[i]->SetOption("colz");
+      offstruct[k].wqcnt[i]->SetXTitle("p_{T} (GeV/c)");
+      offstruct[k].wqcnt[i]->SetYTitle("#eta");
+      for(int j = 0; j<7; j++) {
+	offstruct[k].wqxtrk[j][i] = subdir.make<TH2D>(Form("wqxtrk%d_%d_%d",j+1,k,i),Form("wqxtrk%d_%d_%d",j+1,k,i),nptbins,ptbins, netabins, etabins);
+	offstruct[k].wqytrk[j][i] = subdir.make<TH2D>(Form("wqytrk%d_%d_%d",j+1,k,i),Form("wqytrk%d_%d_%d",j+1,k,i),nptbins,ptbins, netabins, etabins);
+	offstruct[k].wqxtrk[j][i]->SetOption("colz");
+	offstruct[k].wqytrk[j][i]->SetOption("colz");
+	offstruct[k].wqxtrk[j][i]->SetXTitle("p_{T} (GeV/c)");
+	offstruct[k].wqxtrk[j][i]->SetYTitle("#eta");
+	offstruct[k].wqytrk[j][i]->SetXTitle("p_{T} (GeV/c)");
+	offstruct[k].wqytrk[j][i]->SetYTitle("#eta");
+      }
     }
   }
   fparams->SetBinContent(1,minet_);
   fparams->SetBinContent(2,maxet_);
   fparams->SetBinContent(3,minpt_);
   fparams->SetBinContent(4,maxpt_);
-  fparams->SetBinContent(5,minvtx_);
-  fparams->SetBinContent(6,maxvtx_);
-  fparams->SetBinContent(7,caloCentRef_);
-  fparams->SetBinContent(8,caloCentRefWidth_);
+  fparams->SetBinContent(5,flatminvtx_);
+  fparams->SetBinContent(6,flatmaxvtx_);
+  fparams->SetBinContent(7,flatdelvtx_);
+  fparams->SetBinContent(8,caloCentRef_);
+  fparams->SetBinContent(9,caloCentRefWidth_);
   iparams->SetBinContent(1,FlatOrder_);
   iparams->SetBinContent(2,NumFlatBins_);
   iparams->SetBinContent(3,CentBinCompression_);
+  iparams->SetBinContent(4,flatnvtxbins_);
   tree = fs->make<TTree>("tree","EP tree");
   tree->Branch("Cent",    &centval,    "cent/F");
   tree->Branch("Vtx",     &vtx,        "vtx/F");
@@ -428,7 +446,7 @@ EvtPlaneCalibTree::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     newrun = kFALSE;
     //
     //Get Size of Centrality Table
-    if(!useNtrk_) {
+    if(!useNtrk_ && centralityVariable_ != "MC") {
       edm::ESHandle<CentralityTable> centDB_;
       iSetup.get<HeavyIonRcd>().get(centralityLabel_,centDB_);
       nCentBins_ = (int) centDB_->m_table.size();
@@ -454,6 +472,13 @@ EvtPlaneCalibTree::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     cout<<"calib ntrkbin: "<<ntrkval<<endl;
     if(bin<0 || bin>=ntrkbins) return;
   }
+  double b;
+  if(genMC_) {
+    iEvent.getByToken(bToken, b_);
+    b = *b_;     
+    hb->Fill(500.*b);
+
+  } 
   //
   //Get Vertex
   //
@@ -471,7 +496,7 @@ EvtPlaneCalibTree::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   double vz = recoVertices[primaryvtx].z();
   vtx = vz;
 
-  if(vtx>minvtx_ && vtx<maxvtx_) {    
+  if(vtx>flatminvtx_ && vtx<flatmaxvtx_) {    
     //
     //Get Event Planes
     //
@@ -530,20 +555,21 @@ EvtPlaneCalibTree::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
       double pt = itTrack->pt();
       double eta = itTrack->eta();
       double phi = itTrack->phi();
-      if(evcnt==843||evcnt==945||evcnt==1960) cout<<evcnt<<"\t"<<eta<<"\t"<<vtx<<endl;
       if(fabs(eta)<0.8 && fabs(vtx)<15) {
 	hptspec->Fill(pt); 
 	if(pt>=0.3 && pt<3.0) ++evtrkcnt;
       }
-      for(int j = 0; j<7; j++) {
-	wqxtrk[j][trkbin]->Fill(pt, eta, cos( (1.+j) * phi ));
-	wqytrk[j][trkbin]->Fill(pt, eta, sin( (1.+j) * phi ));
+      int k = (vtx-flatminvtx_)/flatdelvtx_;
+      if(k>=0&&k<flatnvtxbins_) {
+ 	for(int j = 0; j<7; j++) {
+	  offstruct[k].wqxtrk[j][trkbin]->Fill(pt, eta, cos( (1.+j) * phi ));
+	  offstruct[k].wqytrk[j][trkbin]->Fill(pt, eta, sin( (1.+j) * phi ));
+	}
+	offstruct[k].wqcnt[trkbin]->Fill(pt,eta);
       }
-      wqcnt[trkbin]->Fill(pt,eta);
-    }
-    //cout<<evcnt<<"\t"<<evtrkcnt<<endl;
-    ++evcnt;
-    
+      //cout<<evcnt<<"\t"<<evtrkcnt<<endl;
+      ++evcnt;
+    } 
   }
 }
 

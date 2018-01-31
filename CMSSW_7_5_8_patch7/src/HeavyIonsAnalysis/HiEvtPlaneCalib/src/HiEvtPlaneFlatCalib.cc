@@ -214,6 +214,9 @@ class HiEvtPlaneFlatCalib : public edm::EDAnalyzer {
   int minrun_;
   int maxrun_;
   int FlatOrder_;
+  int flatnvtxbins_;
+  double flatminvtx_;
+  double flatdelvtx_;
   double caloCentRef_;
   double caloCentRefWidth_;
   int caloCentRefMinBin_;
@@ -276,6 +279,9 @@ HiEvtPlaneFlatCalib::HiEvtPlaneFlatCalib(const edm::ParameterSet& iConfig):runno
   CentBinCompression_ = iConfig.getUntrackedParameter<int>("CentBinCompression_",5);
   caloCentRef_ = iConfig.getUntrackedParameter<double>("caloCentRef_",80.);
   caloCentRefWidth_ = iConfig.getUntrackedParameter<double>("caloCentRefWidth_",5.);
+  flatnvtxbins_ = iConfig.getParameter<int>("flatnvtxbins") ;
+  flatminvtx_ = iConfig.getParameter<double>("flatminvtx") ;
+  flatdelvtx_ = iConfig.getParameter<double>("flatdelvtx") ;
   if(NumFlatBins_ > MaxNumFlatBins) {
     cout<<"NumFlatBins set to max of "<<MaxNumFlatBins<<endl;
   }
@@ -337,7 +343,7 @@ HiEvtPlaneFlatCalib::HiEvtPlaneFlatCalib(const edm::ParameterSet& iConfig):runno
     if(i>0) epnames = epnames + ":" + EPNames[i].data() + "/D";
     TFileDirectory subdir = fs->mkdir(Form("%s",EPNames[i].data()));
     flat[i] = new HiEvtPlaneFlatten();
-    flat[i]->init(FlatOrder_,NumFlatBins_,EPNames[i],EPOrder[i]);
+    flat[i]->init(FlatOrder_,NumFlatBins_,flatnvtxbins_,flatminvtx_,flatdelvtx_,EPNames[i],EPOrder[i]);
     Hbins = flat[i]->getHBins();
     Obins = flat[i]->getOBins();
 
