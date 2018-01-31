@@ -208,6 +208,9 @@ private:
   double maxpt_;
   double minvtx_;
   double maxvtx_;
+  int flatnvtxbins_;
+  double flatminvtx_;
+  double flatdelvtx_;
   double dzerr_;
   double chi2_;
   int FlatOrder_;
@@ -240,6 +243,9 @@ EvtPlaneProducer::EvtPlaneProducer(const edm::ParameterSet& iConfig):
   maxpt_ ( iConfig.getParameter<double>("maxpt") ),
   minvtx_ ( iConfig.getParameter<double>("minvtx") ),
   maxvtx_ ( iConfig.getParameter<double>("maxvtx") ),
+  flatnvtxbins_ ( iConfig.getParameter<int>("flatnvtxbins") ),
+  flatminvtx_ ( iConfig.getParameter<double>("flatminvtx") ),
+  flatdelvtx_ ( iConfig.getParameter<double>("flatdelvtx") ),
   dzerr_ ( iConfig.getParameter<double>("dzerr") ),
   chi2_  ( iConfig.getParameter<double>("chi2") ),
   FlatOrder_ ( iConfig.getParameter<int>("FlatOrder") ),
@@ -272,7 +278,7 @@ EvtPlaneProducer::EvtPlaneProducer(const edm::ParameterSet& iConfig):
     NumFlatBins_ = ntrkbins;
     CentBinCompression_ = 1;
   }
-  std::cout<<"EvtPlaneProducer: "<<trackTag_.label()<<std::endl;
+  //  std::cout<<"EvtPlaneProducer: "<<trackTag_.label()<<std::endl;
 
   produces<reco::EvtPlaneCollection>();
   for(int i = 0; i<NumEPNames; i++ ) {
@@ -280,7 +286,7 @@ EvtPlaneProducer::EvtPlaneProducer(const edm::ParameterSet& iConfig):
   }
   for(int i = 0; i<NumEPNames; i++) {
     flat[i] = new HiEvtPlaneFlatten();
-    flat[i]->init(FlatOrder_,NumFlatBins_,EPNames[i],EPOrder[i]);
+    flat[i]->init(FlatOrder_,NumFlatBins_,flatnvtxbins_,flatminvtx_,flatdelvtx_,EPNames[i],EPOrder[i]);
   }
 
 }
@@ -518,7 +524,7 @@ EvtPlaneProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       } //end for
     }
 
-    std::auto_ptr<EvtPlaneCollection> evtplaneOutput(new EvtPlaneCollection);
+    auto evtplaneOutput = std::make_unique<EvtPlaneCollection> ();
 
     double ang=-10;
     double sv = 0;
@@ -538,7 +544,7 @@ EvtPlaneProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       evtplaneOutput->back().addLevel(3, 0., svNoWgt, cvNoWgt);
     }
 
-    iEvent.put(evtplaneOutput);
+    iEvent.put(std::move(evtplaneOutput));
 }
 
 //define this as a plug-in

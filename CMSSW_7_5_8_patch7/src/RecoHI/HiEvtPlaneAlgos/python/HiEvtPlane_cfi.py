@@ -22,6 +22,9 @@ hiEvtPlane = cms.EDProducer("EvtPlaneProducer",
                             maxpt = cms.double(3.0),
                             minvtx = cms.double(-25.),
                             maxvtx = cms.double(25.),
+                            flatnvtxbins = cms.int32(10),
+                            flatminvtx = cms.double(-25.0),
+                            flatdelvtx = cms.double(5.0),
                             dzerr = cms.double(10.),
                             chi2 = cms.double(40.)
                             )
