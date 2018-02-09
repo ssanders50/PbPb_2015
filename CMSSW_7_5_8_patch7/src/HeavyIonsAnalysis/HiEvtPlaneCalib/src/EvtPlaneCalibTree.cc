@@ -309,7 +309,7 @@ EvtPlaneCalibTree::EvtPlaneCalibTree(const edm::ParameterSet& iConfig) {
   
   FirstEvent = kTRUE;
   hcent = fs->make<TH1D>("cent","cent",101,0,100);
-  hb = fs->make<TH1D>("b","b",10000,0,10000);
+  hb = fs->make<TH1D>("b","b",12000,0,12000);
   hcentbins = fs->make<TH1D>("centbins","centbins",ncentbins,centbins);
   hflatbins = fs->make<TH1D>("flatbins","flatbins",100,0,100);
   htrkbins = fs->make<TH1D>("trkbins","trkbins",ntrkbins,trkbins);
