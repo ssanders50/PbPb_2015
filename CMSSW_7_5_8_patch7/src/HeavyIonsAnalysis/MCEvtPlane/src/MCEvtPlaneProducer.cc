@@ -315,7 +315,7 @@ MCEvtPlaneProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   iEvent.getByLabel(Npart_, fNpart);
   iEvent.getByLabel(b_, fb);
   for(int i = 0; i<NumEPNames; i++) rp[i]->reset();
-  int bin = bToCent(100.* (*fb));
+  int bin = bToCent(500.* (*fb));
   if(bin<0) bin = 0;
   if(bin>=200) bin=199;
 
