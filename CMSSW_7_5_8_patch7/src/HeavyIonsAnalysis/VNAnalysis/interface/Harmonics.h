@@ -30,231 +30,54 @@ void Fill_N(int anal,int bin, TH2D *qxtrk_, TH2D * qytrk_, TH2D * qcnt_, double 
   qanal[anal].qCAcnt[bin][j]->Fill(0.,wC*wA);
   qanal[anal].qCBcnt[bin][j]->Fill(0.,wC*wB);
 }
-void Fill_N112A(int anal, int bin, TH2D * qxtrk_, TH2D * qytrk_, TH2D * qcnt_, double * qx, double * qy, double * sumw){
-  double a1x = qx[HFp1];
-  double a1y = qy[HFp1];
-  double a1w = sumw[HFp1];
-  double a2x = qx[HFp2];
-  double a2y = qy[HFp2];
-  double a2w = sumw[HFp2];
 
-  double b1x = qx[HFm1];
-  double b1y = qy[HFm1];
-  double b1w = sumw[HFm1];
-  double b2x = qx[HFm2];
-  double b2y = qy[HFm2];
-  double b2w = sumw[HFm2];
+void Fill_N112(int anal, int bin,int epa1, int epa2, int epb1, int epb2,  TH2D * qxtrk_, TH2D * qytrk_, TH2D * qcnt_, double * qx, double * qy, double * sumw){
+  double a1x = qx[epa1];
+  double a1y = qy[epa1];
+  double a1w = sumw[epa1];
+  double a2x = qx[epa2];
+  double a2y = qy[epa2];
+  double a2w = sumw[epa2];
 
-  double c1x = qx[trackm110];
-  double c1y = qy[trackm110];
-  double c1w = sumw[trackm110];
+  double b1x = qx[epb1];
+  double b1y = qy[epb1];
+  double b1w = sumw[epb1];
+  double b2x = qx[epb2];
+  double b2y = qy[epb2];
+  double b2w = sumw[epb2];
 
   if(pow(a1x,2)+pow(a1y,2) < 1e-8) return;
   if(pow(b1x,2)+pow(b1y,2) < 1e-8) return;
-  if(pow(c1x,2)+pow(c1y,2) < 1e-8) return;
   if(pow(a2x,2)+pow(a2y,2) < 1e-8) return;
   if(pow(b2x,2)+pow(b2y,2) < 1e-8) return;
 
-  qanal[anal].qA[bin][0]->Add(qxtrk_,a1x*b2x+a1y*b2y);
-  qanal[anal].qA[bin][0]->Add(qytrk_,-a1y*b2x+a1x*b2y);
-  qanal[anal].qB[bin][0]->Add(qxtrk_,b1x*a2x+b1y*a2y);
-  qanal[anal].qB[bin][0]->Add(qytrk_,-b1y*a2x+b1x*a2y);
-  qanal[anal].wnA[bin][0]->Add(qcnt_,a1w*b2w);
-  qanal[anal].wnB[bin][0]->Add(qcnt_,b1w*a2w);
+  qanal[anal].qA[bin][0]->Add(qxtrk_,a1x*a2x+a1y*a2y);
+  qanal[anal].qA[bin][0]->Add(qytrk_,-a1y*a2x+a1x*a2y);
+  qanal[anal].qB[bin][0]->Add(qxtrk_,b1x*b2x+b1y*b2y);
+  qanal[anal].qB[bin][0]->Add(qytrk_,-b1y*b2x+b1x*b2y);
+  qanal[anal].wnA[bin][0]->Add(qcnt_,a1w*a2w);
+  qanal[anal].wnB[bin][0]->Add(qcnt_,b1w*b2w);
   qanal[anal].qBA[bin][0]->Fill(0., a1x*b1x*b2x - a1y*b1y*b2x + a1y*b1x*b2y + a1x*b1y*b2y);
-  qanal[anal].qCA[bin][0]->Fill(0., a1x*b2x*c1x + a1y*b2y*c1x - a1y*b2x*c1y + a1x*b2y*c1y); 
-  qanal[anal].qCB[bin][0]->Fill(0.,b1x*c1x + b1y*c1y);
+  qanal[anal].qCA[bin][0]->Fill(0., a2x*b2x+a2y+b2y); 
+  qanal[anal].qCB[bin][0]->Fill(0.,1.);
   qanal[anal].qBAcnt[bin][0]->Fill(0.,b1w*a1w*b2w);
-  qanal[anal].qCAcnt[bin][0]->Fill(0.,c1w*a1w*b2w);
-  qanal[anal].qCBcnt[bin][0]->Fill(0.,c1w*b1w);
+  qanal[anal].qCAcnt[bin][0]->Fill(0.,a2w*b2w);
+  qanal[anal].qCBcnt[bin][0]->Fill(0.,1);
   
   int j=(int)(ran->Uniform(0,9.999))+1;
-  qanal[anal].qA[bin][j]->Add(qxtrk_,a1x*b2x+a1y*b2y);
-  qanal[anal].qA[bin][j]->Add(qytrk_,-a1y*b2x+a1x*b2y);
-  qanal[anal].qB[bin][j]->Add(qxtrk_,b1x*a2x+b1y*a2y);
-  qanal[anal].qB[bin][j]->Add(qytrk_,-b1y*a2x+b1x*a2y);
-  qanal[anal].wnA[bin][j]->Add(qcnt_,a1w*b2w);
-  qanal[anal].wnB[bin][j]->Add(qcnt_,b1w*a2w);
+  qanal[anal].qA[bin][j]->Add(qxtrk_,a1x*a2x+a1y*a2y);
+  qanal[anal].qA[bin][j]->Add(qytrk_,-a1y*a2x+a1x*a2y);
+  qanal[anal].qB[bin][j]->Add(qxtrk_,b1x*b2x+b1y*b2y);
+  qanal[anal].qB[bin][j]->Add(qytrk_,-b1y*b2x+b1x*b2y);
+  qanal[anal].wnA[bin][j]->Add(qcnt_,a1w*a2w);
+  qanal[anal].wnB[bin][j]->Add(qcnt_,b1w*b2w);
   qanal[anal].qBA[bin][j]->Fill(0., a1x*b1x*b2x - a1y*b1y*b2x + a1y*b1x*b2y + a1x*b1y*b2y);
-  qanal[anal].qCA[bin][j]->Fill(0., a1x*b2x*c1x + a1y*b2y*c1x - a1y*b2x*c1y + a1x*b2y*c1y); 
-  qanal[anal].qCB[bin][j]->Fill(0.,b1x*c1x + b1y*c1y);
-
+  qanal[anal].qCA[bin][j]->Fill(0., a2x*b2x+a2y+b2y); 
+  qanal[anal].qCB[bin][j]->Fill(0.,1.);
   qanal[anal].qBAcnt[bin][j]->Fill(0.,b1w*a1w*b2w);
-  qanal[anal].qCAcnt[bin][j]->Fill(0.,c1w*a1w*b2w);
-  qanal[anal].qCBcnt[bin][j]->Fill(0.,c1w*b1w);
+  qanal[anal].qCAcnt[bin][j]->Fill(0.,a2w*b2w);
+  qanal[anal].qCBcnt[bin][j]->Fill(0.,1);
 }
-
-void Fill_N112B(int anal, int bin, TH2D * qxtrk_, TH2D * qytrk_, TH2D * qcnt_, double * qx, double * qy, double * sumw){
-  double a1x = qx[HFm1];
-  double a1y = qy[HFm1];
-  double a1w = sumw[HFm1];
-  double a2x = qx[HFm2];
-  double a2y = qy[HFm2];
-  double a2w = sumw[HFm2];
-
-  double b1x = qx[HFp1];
-  double b1y = qy[HFp1];
-  double b1w = sumw[HFp1];
-  double b2x = qx[HFp2];
-  double b2y = qy[HFp2];
-  double b2w = sumw[HFp2];
-
-  double c1x = qx[trackp110];
-  double c1y = qy[trackp110];
-  double c1w = sumw[trackp110];
-
-  if(pow(a1x,2)+pow(a1y,2) < 1e-8) return;
-  if(pow(b1x,2)+pow(b1y,2) < 1e-8) return;
-  if(pow(c1x,2)+pow(c1y,2) < 1e-8) return;
-  if(pow(a2x,2)+pow(a2y,2) < 1e-8) return;
-  if(pow(b2x,2)+pow(b2y,2) < 1e-8) return;
-
-
-  qanal[anal].qA[bin][0]->Add(qxtrk_,a1x*b2x+a1y*b2y);
-  qanal[anal].qA[bin][0]->Add(qytrk_,-a1y*b2x+a1x*b2y);
-  qanal[anal].qB[bin][0]->Add(qxtrk_,b1x*a2x+b1y*a2y);
-  qanal[anal].qB[bin][0]->Add(qytrk_,-b1y*a2x+b1x*a2y);
-  qanal[anal].wnA[bin][0]->Add(qcnt_,a1w*b2w);
-  qanal[anal].wnB[bin][0]->Add(qcnt_,b1w*a2w);
-  qanal[anal].qBA[bin][0]->Fill(0., a1x*b1x*b2x - a1y*b1y*b2x + a1y*b1x*b2y + a1x*b1y*b2y);
-  qanal[anal].qCA[bin][0]->Fill(0., a1x*b2x*c1x + a1y*b2y*c1x - a1y*b2x*c1y + a1x*b2y*c1y); 
-  qanal[anal].qCB[bin][0]->Fill(0.,b1x*c1x + b1y*c1y);
-  qanal[anal].qBAcnt[bin][0]->Fill(0.,b1w*a1w*b2w);
-  qanal[anal].qCAcnt[bin][0]->Fill(0.,c1w*a1w*b2w);
-  qanal[anal].qCBcnt[bin][0]->Fill(0.,c1w*b1w);
-  
-  int j=(int)(ran->Uniform(0,9.999))+1;
-  qanal[anal].qA[bin][j]->Add(qxtrk_,a1x*b2x+a1y*b2y);
-  qanal[anal].qA[bin][j]->Add(qytrk_,-a1y*b2x+a1x*b2y);
-  qanal[anal].qB[bin][j]->Add(qxtrk_,b1x*a2x+b1y*a2y);
-  qanal[anal].qB[bin][j]->Add(qytrk_,-b1y*a2x+b1x*a2y);
-  qanal[anal].wnA[bin][j]->Add(qcnt_,a1w*b2w);
-  qanal[anal].wnB[bin][j]->Add(qcnt_,b1w*a2w);
-  qanal[anal].qBA[bin][j]->Fill(0., a1x*b1x*b2x - a1y*b1y*b2x + a1y*b1x*b2y + a1x*b1y*b2y);
-  qanal[anal].qCA[bin][j]->Fill(0., a1x*b2x*c1x + a1y*b2y*c1x - a1y*b2x*c1y + a1x*b2y*c1y); 
-  qanal[anal].qCB[bin][j]->Fill(0.,b1x*c1x + b1y*c1y);
-
-  qanal[anal].qBAcnt[bin][j]->Fill(0.,b1w*a1w*b2w);
-  qanal[anal].qCAcnt[bin][j]->Fill(0.,c1w*a1w*b2w);
-  qanal[anal].qCBcnt[bin][j]->Fill(0.,c1w*b1w);
-
-}
-
-void Fill_N123A(int anal, int bin, TH2D * qxtrk_, TH2D * qytrk_, TH2D * qcnt_, double * qx, double * qy, double * sumw){
-  double a2x = qx[HFp2];
-  double a2y = qy[HFp2];
-  double a2w = sumw[HFp2];
-  double a3x = qx[HFp3];
-  double a3y = qy[HFp3];
-  double a3w = sumw[HFp3];
-
-  double b2x = qx[HFm2];
-  double b2y = qy[HFm2];
-  double b2w = sumw[HFm2];
-  double b3x = qx[HFm3];
-  double b3y = qy[HFm3];
-  double b3w = sumw[HFm3];
-
-  double c2x = qx[trackmid2];
-  double c2y = qy[trackmid2];
-  double c2w = sumw[trackmid2];
-  double c3x = qx[trackmid3];
-  double c3y = qy[trackmid3];
-  double c3w = sumw[trackmid3];
-
-  if(pow(a2x,2)+pow(a2y,2) < 1e-6) return;
-  if(pow(b2x,2)+pow(b2y,2) < 1e-6) return;
-  if(pow(c2x,2)+pow(c2y,2) < 1e-6) return;
-  if(pow(a3x,2)+pow(a3y,2) < 1e-6) return;
-  if(pow(b3x,2)+pow(b3y,2) < 1e-6) return;
-  if(pow(c3x,2)+pow(c3y,2) < 1e-6) return;
-
-  qanal[anal].qA[bin][0]->Add(qxtrk_,a2x*b3x+a2y*b3y);
-  qanal[anal].qA[bin][0]->Add(qytrk_,-a2y*b3x+a2x*b3y);
-  qanal[anal].qB[bin][0]->Add(qxtrk_,b2x*a3x+b2y*a3y);
-  qanal[anal].qB[bin][0]->Add(qytrk_,-b2y*a3x+b2x*a3y);
-  qanal[anal].wnA[bin][0]->Add(qcnt_,a2w*b3w);
-  qanal[anal].wnB[bin][0]->Add(qcnt_,b2w*a3w);
-  qanal[anal].qBA[bin][0]->Fill(0.,a2x*a3x*b2x*b3x - a2y*a3y*b2x*b3x + a2y*a3x*b2y*b3x + a2x*a3y*b2y*b3x + a2y*a3x*b2x*b3y + a2x*a3y*b2x*b3y - a2x*a3x*b2y*b3y + a2y*a3y*b2y*b3y);
-  qanal[anal].qCA[bin][0]->Fill(0.,a2x*b3x*c2x*c3x + a2y*b3y*c2x*c3x + a2y*b3x*c2y*c3x - a2x*b3y*c2y*c3x - a2y*b3x*c2x*c3y + a2x*b3y*c2x*c3y + a2x*b3x*c2y*c3y + a2y*b3y*c2y*c3y);
-  qanal[anal].qCB[bin][0]->Fill(0.,a3x*b2x*c2x*c3x + a3y*b2y*c2x*c3x + a3y*b2x*c2y*c3x - a3x*b2y*c2y*c3x - a3y*b2x*c2x*c3y + a3x*b2y*c2x*c3y + a3x*b2x*c2y*c3y + a3y*b2y*c2y*c3y);
-  qanal[anal].qBAcnt[bin][0]->Fill(0.,b2w*a3w*a2w*b3w);
-  qanal[anal].qCAcnt[bin][0]->Fill(0.,c2w*c3w*a2w*b3w);
-  qanal[anal].qCBcnt[bin][0]->Fill(0.,c2w*c3w*b2w*a3w);
-  
-  int j=(int)(ran->Uniform(0,9.999))+1;
-  qanal[anal].qA[bin][j]->Add(qxtrk_,a2x*b3x+a2y*b3y);
-  qanal[anal].qA[bin][j]->Add(qytrk_,-a2y*b3x+a2x*b3y);
-  qanal[anal].qB[bin][j]->Add(qxtrk_,b2x*a3x+b2y*a3y);
-  qanal[anal].qB[bin][j]->Add(qytrk_,-b2y*a3x+b2x*a3y);
-  qanal[anal].wnA[bin][j]->Add(qcnt_,a2w*b3w);
-  qanal[anal].wnB[bin][j]->Add(qcnt_,b2w*a3w);
-  qanal[anal].qBA[bin][j]->Fill(0.,a2x*a3x*b2x*b3x - a2y*a3y*b2x*b3x + a2y*a3x*b2y*b3x + a2x*a3y*b2y*b3x + a2y*a3x*b2x*b3y + a2x*a3y*b2x*b3y - a2x*a3x*b2y*b3y + a2y*a3y*b2y*b3y);
-  qanal[anal].qCA[bin][j]->Fill(0.,a2x*b3x*c2x*c3x + a2y*b3y*c2x*c3x + a2y*b3x*c2y*c3x - a2x*b3y*c2y*c3x - a2y*b3x*c2x*c3y + a2x*b3y*c2x*c3y + a2x*b3x*c2y*c3y + a2y*b3y*c2y*c3y);
-  qanal[anal].qCB[bin][j]->Fill(0.,a3x*b2x*c2x*c3x + a3y*b2y*c2x*c3x + a3y*b2x*c2y*c3x - a3x*b2y*c2y*c3x - a3y*b2x*c2x*c3y + a3x*b2y*c2x*c3y + a3x*b2x*c2y*c3y + a3y*b2y*c2y*c3y);
-  qanal[anal].qBAcnt[bin][j]->Fill(0.,b2w*a3w*a2w*b3w);
-  qanal[anal].qCAcnt[bin][j]->Fill(0.,c2w*c3w*a2w*b3w);
-  qanal[anal].qCBcnt[bin][j]->Fill(0.,c2w*c3w*b2w*a3w);
-}
-
-
-void Fill_N123B(int anal, int bin, TH2D * qxtrk_, TH2D * qytrk_, TH2D * qcnt_, double * qx, double * qy, double * sumw){
-  double a2x = qx[HFm2];
-  double a2y = qy[HFm2];
-  double a2w = sumw[HFm2];
-  double a3x = qx[HFm3];
-  double a3y = qy[HFm3];
-  double a3w = sumw[HFm3];
-
-  double b2x = qx[HFp2];
-  double b2y = qy[HFp2];
-  double b2w = sumw[HFp2];
-  double b3x = qx[HFp3];
-  double b3y = qy[HFp3];
-  double b3w = sumw[HFp3];
-
-  double c2x = qx[trackmid2];
-  double c2y = qy[trackmid2];
-  double c2w = sumw[trackmid2];
-  double c3x = qx[trackmid3];
-  double c3y = qy[trackmid3];
-  double c3w = sumw[trackmid3];
-
-  if(pow(a2x,2)+pow(a2y,2) < 1e-6) return;
-  if(pow(b2x,2)+pow(b2y,2) < 1e-6) return;
-  if(pow(c2x,2)+pow(c2y,2) < 1e-6) return;
-  if(pow(a3x,2)+pow(a3y,2) < 1e-6) return;
-  if(pow(b3x,2)+pow(b3y,2) < 1e-6) return;
-  if(pow(c3x,2)+pow(c3y,2) < 1e-6) return;
-
-  qanal[anal].qA[bin][0]->Add(qxtrk_,a2x*b3x+a2y*b3y);
-  qanal[anal].qA[bin][0]->Add(qytrk_,-a2y*b3x+a2x*b3y);
-  qanal[anal].qB[bin][0]->Add(qxtrk_,b2x*a3x+b2y*a3y);
-  qanal[anal].qB[bin][0]->Add(qytrk_,-b2y*a3x+b2x*a3y);
-  qanal[anal].wnA[bin][0]->Add(qcnt_,a2w*b3w);
-  qanal[anal].wnB[bin][0]->Add(qcnt_,b2w*a3w);
-  qanal[anal].qBA[bin][0]->Fill(0.,a2x*a3x*b2x*b3x - a2y*a3y*b2x*b3x + a2y*a3x*b2y*b3x + a2x*a3y*b2y*b3x + a2y*a3x*b2x*b3y + a2x*a3y*b2x*b3y - a2x*a3x*b2y*b3y + a2y*a3y*b2y*b3y);
-  qanal[anal].qCA[bin][0]->Fill(0.,a2x*b3x*c2x*c3x + a2y*b3y*c2x*c3x + a2y*b3x*c2y*c3x - a2x*b3y*c2y*c3x - a2y*b3x*c2x*c3y + a2x*b3y*c2x*c3y + a2x*b3x*c2y*c3y + a2y*b3y*c2y*c3y);
-  qanal[anal].qCB[bin][0]->Fill(0.,a3x*b2x*c2x*c3x + a3y*b2y*c2x*c3x + a3y*b2x*c2y*c3x - a3x*b2y*c2y*c3x - a3y*b2x*c2x*c3y + a3x*b2y*c2x*c3y + a3x*b2x*c2y*c3y + a3y*b2y*c2y*c3y);
-  qanal[anal].qBAcnt[bin][0]->Fill(0.,b2w*a3w*a2w*b3w);
-  qanal[anal].qCAcnt[bin][0]->Fill(0.,c2w*c3w*a2w*b3w);
-  qanal[anal].qCBcnt[bin][0]->Fill(0.,c2w*c3w*b2w*a3w);
-  
-  int j=(int)(ran->Uniform(0,9.999))+1;
-  qanal[anal].qA[bin][j]->Add(qxtrk_,a2x*b3x+a2y*b3y);
-  qanal[anal].qA[bin][j]->Add(qytrk_,-a2y*b3x+a2x*b3y);
-  qanal[anal].qB[bin][j]->Add(qxtrk_,b2x*a3x+b2y*a3y);
-  qanal[anal].qB[bin][j]->Add(qytrk_,-b2y*a3x+b2x*a3y);
-  qanal[anal].wnA[bin][j]->Add(qcnt_,a2w*b3w);
-  qanal[anal].wnB[bin][j]->Add(qcnt_,b2w*a3w);
-  qanal[anal].qBA[bin][j]->Fill(0.,a2x*a3x*b2x*b3x - a2y*a3y*b2x*b3x + a2y*a3x*b2y*b3x + a2x*a3y*b2y*b3x + a2y*a3x*b2x*b3y + a2x*a3y*b2x*b3y - a2x*a3x*b2y*b3y + a2y*a3y*b2y*b3y);
-  qanal[anal].qCA[bin][j]->Fill(0.,a2x*b3x*c2x*c3x + a2y*b3y*c2x*c3x + a2y*b3x*c2y*c3x - a2x*b3y*c2y*c3x - a2y*b3x*c2x*c3y + a2x*b3y*c2x*c3y + a2x*b3x*c2y*c3y + a2y*b3y*c2y*c3y);
-  qanal[anal].qCB[bin][j]->Fill(0.,a3x*b2x*c2x*c3x + a3y*b2y*c2x*c3x + a3y*b2x*c2y*c3x - a3x*b2y*c2y*c3x - a3y*b2x*c2x*c3y + a3x*b2y*c2x*c3y + a3x*b2x*c2y*c3y + a3y*b2y*c2y*c3y);
-  qanal[anal].qBAcnt[bin][j]->Fill(0.,b2w*a3w*a2w*b3w);
-  qanal[anal].qCAcnt[bin][j]->Fill(0.,c2w*c3w*a2w*b3w);
-  qanal[anal].qCBcnt[bin][j]->Fill(0.,c2w*c3w*b2w*a3w);
-}
-
 
 void Fill_N42(int anal, int bin, TH2D * qxtrk_, TH2D * qytrk_, TH2D * qcnt_, double * qx, double * qy, double * sumw){
   double Ax = qx[HFp2];
