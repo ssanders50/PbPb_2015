@@ -74,30 +74,32 @@ static const float ptbins[]={0.3, 0.4, 0.5,  0.6,  0.8,  1.0,  1.25,  1.50,  2.0
 
 static const int netabinsDefault = 12;
 static const float etabinsDefault[]={-2.4, -2.0, -1.6, -1.2, -0.8, -0.4, 0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.4};
-static const int nanals = 48;
+static const int nanals = 54;
 enum AnalType {
-  N1MCm22, N1MCm18, N1MCm14, N1MCm10, N1MCm06,
-  N1MCm02, N1MCp22, N1MCp18, N1MCp14, N1MCp10,
-  N1MCp06, N1MCp02,   N112A,   N112B,   N123A,
-    N123B,     N1A,     N1B,      N2,      
-       N3,      N4,      N5,      N6,      N7,     
-      N42,    N42A,    N42B,    N42C,    N523,   
-    N523A,     N63,    N63A,    N63B,    N63C,
-      N62,    N62A,    N723,   N723A,     D24,
-     D24A,     D26,    D26A,     D34,    D34A,
-    D2232,  D2232A,   D2432,  D2432A
+   N1MCm22, N1MCm18,  N1MCp22, N1MCp18,      N1A,      
+       N1B,   N112A,    N112B,  N112Ac,   N112Bc,
+    N112Ad,  N112Bd,   N112Ae,  N112Be,   N112Af, 
+    N112Bf, N1HFm1c,  N1HFm1d, N1HFm1e,  N1HFm1f,
+   N1HFp1c, N1HFp1d,  N1HFp1e, N1HFp1f,       N2,      
+        N3,      N4,       N5,      N6,       N7,     
+       N42,    N42A,     N42B,    N42C,     N523,   
+     N523A,     N63,     N63A,    N63B,     N63C,
+       N62,    N62A,     N723,   N723A,      D24,
+      D24A,     D26,     D26A,     D34,     D34A,
+     D2232,  D2232A,    D2432,  D2432A
 };
 string AnalNames[]={
-  "N1MCm22", "N1MCm18", "N1MCm14", "N1MCm10","N1MCm06",
-  "N1MCm02", "N1MCp22", "N1MCp18", "N1MCp14","N1MCp10",
-  "N1MCp06", "N1MCp02",   "N112A",  "N112B",   "N123A",  
-    "N123B",     "N1A",     "N1B",     "N2",    
-       "N3",      "N4",      "N5",      "N6",     "N7",   
-      "N42",    "N42A",    "N42B",    "N42C",   "N523",   
-    "N523A",     "N63",    "N63A",    "N63B",   "N63C",
-      "N62",   "N62A",     "N723",   "N723A",    "D24",
-     "D24A",    "D26",     "D26A",     "D34",   "D34A",
-    "D2232", "D2232A",    "D2432",   "D2432A"
+  "N1MCm22", "N1MCm18",  "N1MCp22", "N1MCp18",    "N1A",      
+      "N1B",   "N112A",    "N112B",  "N112Ac", "N112Bc",
+   "N112Ad",  "N112Bd",   "N112Ae",  "N112Be", "N112Af",  
+   "N112Bf", "N1HFm1c",  "N1HFm1d", "N1HFm1e","N1HFm1f",
+  "N1HFp1c", "N1HFp1d",  "N1HFp1e", "N1HFp1f",     "N2",    
+       "N3",      "N4",       "N5",      "N6",     "N7",   
+      "N42",    "N42A",     "N42B",    "N42C",   "N523",   
+    "N523A",     "N63",     "N63A",    "N63B",   "N63C",
+      "N62",    "N62A",     "N723",   "N723A",    "D24",
+     "D24A",     "D26",     "D26A",     "D34",   "D34A",
+    "D2232",  "D2232A",    "D2432",   "D2432A"
 };
 
 
@@ -1150,55 +1152,70 @@ VNAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   qxycnt[ibin]->Add(qcnt);
   for(int ian = 0; ian<nanals; ian++) {
     if(ian==N1MCm22) Fill_N( N1MCm22, ibin, qxtrk[0], qytrk[0], qcnt, qx[trackm122mc], qy[trackm122mc], qx[trackp122mc], qy[trackp122mc], qx[trackp1mc], qy[trackp1mc],     sumw[trackm122mc], sumw[trackp122mc], sumw[trackp1mc]);
-    if(ian==N1MCm18) Fill_N( N1MCm18, ibin, qxtrk[0], qytrk[0], qcnt, qx[trackm118mc], qy[trackm118mc], qx[trackp122mc], qy[trackp122mc], qx[trackp1mc], qy[trackp1mc],     sumw[trackm118mc], sumw[trackp122mc], sumw[trackp1mc]);
-    if(ian==N1MCm14) Fill_N( N1MCm14, ibin, qxtrk[0], qytrk[0], qcnt, qx[trackm114mc], qy[trackm114mc], qx[trackp122mc], qy[trackp122mc], qx[trackp1mc], qy[trackp1mc],     sumw[trackm114mc], sumw[trackp122mc], sumw[trackp1mc]);
-    if(ian==N1MCm10) Fill_N( N1MCm10, ibin, qxtrk[0], qytrk[0], qcnt, qx[trackm110mc], qy[trackm110mc], qx[trackp122mc], qy[trackp122mc], qx[trackp1mc], qy[trackp1mc],     sumw[trackm110mc], sumw[trackp122mc], sumw[trackp1mc]);
-    if(ian==N1MCm06) Fill_N( N1MCm06, ibin, qxtrk[0], qytrk[0], qcnt, qx[trackm106mc], qy[trackm106mc], qx[trackp122mc], qy[trackp122mc], qx[trackp110mc], qy[trackp110mc], sumw[trackm106mc], sumw[trackp122mc], sumw[trackp110mc]);
-    if(ian==N1MCm02) Fill_N( N1MCm02, ibin, qxtrk[0], qytrk[0], qcnt, qx[trackm102mc], qy[trackm102mc], qx[trackp122mc], qy[trackp122mc], qx[trackp110mc], qy[trackp110mc], sumw[trackm102mc], sumw[trackp122mc], sumw[trackp110mc]);
-    
-    if(ian==N1MCp02) Fill_N( N1MCp02, ibin, qxtrk[0], qytrk[0], qcnt, qx[trackp102mc], qy[trackp102mc], qx[trackm122mc], qy[trackm122mc], qx[trackm110mc], qy[trackm110mc], sumw[trackp102mc], sumw[trackm122mc], sumw[trackm110mc]);
-    if(ian==N1MCp06) Fill_N( N1MCp06, ibin, qxtrk[0], qytrk[0], qcnt, qx[trackp106mc], qy[trackp106mc], qx[trackm122mc], qy[trackm122mc], qx[trackm110mc], qy[trackm110mc], sumw[trackp106mc], sumw[trackm122mc], sumw[trackm110mc]);
-    if(ian==N1MCp10) Fill_N( N1MCp10, ibin, qxtrk[0], qytrk[0], qcnt, qx[trackp110mc], qy[trackp110mc], qx[trackm122mc], qy[trackm122mc], qx[trackm1mc], qy[trackm1mc],     sumw[trackp110mc], sumw[trackm122mc], sumw[trackm1mc]);
-    if(ian==N1MCp14) Fill_N( N1MCp14, ibin, qxtrk[0], qytrk[0], qcnt, qx[trackp114mc], qy[trackp114mc], qx[trackm122mc], qy[trackm122mc], qx[trackm1mc], qy[trackm1mc],     sumw[trackp114mc], sumw[trackm122mc], sumw[trackm1mc]);
+    if(ian==N1MCm18) Fill_N( N1MCm18, ibin, qxtrk[0], qytrk[0], qcnt, qx[trackm118mc], qy[trackm118mc], qx[trackp122mc], qy[trackp122mc], qx[trackp1mc], qy[trackp1mc],     sumw[trackm118mc], sumw[trackp122mc], sumw[trackp1mc]);    
     if(ian==N1MCp18) Fill_N( N1MCp18, ibin, qxtrk[0], qytrk[0], qcnt, qx[trackp118mc], qy[trackp118mc], qx[trackm122mc], qy[trackm122mc], qx[trackm1mc], qy[trackm1mc],     sumw[trackp118mc], sumw[trackm122mc], sumw[trackm1mc]);
-    if(ian==N1MCp22) Fill_N( N1MCp22, ibin, qxtrk[0], qytrk[0], qcnt, qx[trackp122mc], qy[trackp122mc], qx[trackm122mc], qy[trackm122mc], qx[trackm1mc], qy[trackm1mc],     sumw[trackp122mc], sumw[trackm122mc], sumw[trackm1mc]);
-    
-    if(ian==N112A) Fill_N112A(N112A, ibin, qxtrk[0], qytrk[0], qcnt, qx, qy, sumw);
-    if(ian==N112B) Fill_N112B(N112B, ibin, qxtrk[0], qytrk[0], qcnt, qx, qy, sumw);
-    if(ian==N123A) Fill_N123A(N123A, ibin, qxtrk[0], qytrk[0], qcnt, qx, qy, sumw);
+    if(ian==N1MCp22) Fill_N( N1MCp22, ibin, qxtrk[0], qytrk[0], qcnt, qx[trackp122mc], qy[trackp122mc], qx[trackm122mc], qy[trackm122mc], qx[trackm1mc], qy[trackm1mc],     sumw[trackp122mc], sumw[trackm122mc], sumw[trackm1mc]);    
     if(ian==N1A) Fill_N( N1A,  ibin, qxtrk[0], qytrk[0], qcnt, qx[HFp1], qy[HFp1], qx[HFm1], qy[HFm1], qx[trackp114], qy[trackp114], sumw[HFp1], sumw[HFm1], sumw[trackp114]);
+
     if(ian==N1B) Fill_N( N1B,  ibin, qxtrk[0], qytrk[0], qcnt, qx[HFm1], qy[HFm1], qx[HFp1], qy[HFp1], qx[trackm114], qy[trackm114], sumw[HFm1], sumw[HFp1], sumw[trackm114]);
+    if(ian==N112A)  Fill_N112(N112A,  ibin, HFp1,  HFm2, HFm1,  HFp2,   qxtrk[0], qytrk[0], qcnt, qx, qy, sumw);
+    if(ian==N112B)  Fill_N112(N112B,  ibin, HFp1,  HFp2, HFm1,  HFm2,   qxtrk[0], qytrk[0], qcnt, qx, qy, sumw);
+    if(ian==N112Ac)  Fill_N112(N112Ac,  ibin, HFp1c,  HFm2, HFm1c,  HFp2,   qxtrk[0], qytrk[0], qcnt, qx, qy, sumw);
+    if(ian==N112Bc)  Fill_N112(N112Bc,  ibin, HFp1c,  HFp2, HFm1c,  HFm2,   qxtrk[0], qytrk[0], qcnt, qx, qy, sumw);
+
+    if(ian==N112Ad)  Fill_N112(N112Ad,  ibin, HFp1d,  HFm2, HFm1d,  HFp2,   qxtrk[0], qytrk[0], qcnt, qx, qy, sumw);
+    if(ian==N112Bd)  Fill_N112(N112Bd,  ibin, HFp1d,  HFp2, HFm1d,  HFm2,   qxtrk[0], qytrk[0], qcnt, qx, qy, sumw);
+    if(ian==N112Ae)  Fill_N112(N112Ae,  ibin, HFp1e,  HFm2, HFm1e,  HFp2,   qxtrk[0], qytrk[0], qcnt, qx, qy, sumw);
+    if(ian==N112Be)  Fill_N112(N112Be,  ibin, HFp1e,  HFp2, HFm1e,  HFm2,   qxtrk[0], qytrk[0], qcnt, qx, qy, sumw);
+    if(ian==N112Af)  Fill_N112(N112Af,  ibin, HFp1f,  HFm2, HFm1f,  HFp2,   qxtrk[0], qytrk[0], qcnt, qx, qy, sumw);
+
+    if(ian==N112Bf)  Fill_N112(N112Bf,  ibin, HFp1f,  HFp2, HFm1f,  HFm2,   qxtrk[0], qytrk[0], qcnt, qx, qy, sumw);
+    if(ian==N1HFm1c) Fill_N( N1HFm1c,  ibin, qxtrk[0], qytrk[0], qcnt, qx[HFm1c], qy[HFm1c], qx[HFp1c], qy[HFp1c], qx[trackm114], qy[trackm114], sumw[HFm1c], sumw[HFp1c], sumw[trackm114]);
+    if(ian==N1HFm1d) Fill_N( N1HFm1d,  ibin, qxtrk[0], qytrk[0], qcnt, qx[HFm1d], qy[HFm1d], qx[HFp1d], qy[HFp1d], qx[trackm114], qy[trackm114], sumw[HFm1d], sumw[HFp1d], sumw[trackm114]);
+    if(ian==N1HFm1e) Fill_N( N1HFm1e,  ibin, qxtrk[0], qytrk[0], qcnt, qx[HFm1e], qy[HFm1e], qx[HFp1e], qy[HFp1e], qx[trackm114], qy[trackm114], sumw[HFm1e], sumw[HFp1e], sumw[trackm114]);
+    if(ian==N1HFm1f) Fill_N( N1HFm1f,  ibin, qxtrk[0], qytrk[0], qcnt, qx[HFm1f], qy[HFm1f], qx[HFp1f], qy[HFp1f], qx[trackm114], qy[trackm114], sumw[HFm1f], sumw[HFp1f], sumw[trackm114]);
+
+    if(ian==N1HFp1c) Fill_N( N1HFp1c,  ibin, qxtrk[0], qytrk[0], qcnt, qx[HFp1c], qy[HFp1c], qx[HFm1c], qy[HFm1c], qx[trackp114], qy[trackp114], sumw[HFp1c], sumw[HFm1c], sumw[trackp114]);
+    if(ian==N1HFp1d) Fill_N( N1HFp1d,  ibin, qxtrk[0], qytrk[0], qcnt, qx[HFp1d], qy[HFp1d], qx[HFm1d], qy[HFm1d], qx[trackp114], qy[trackp114], sumw[HFp1d], sumw[HFm1d], sumw[trackp114]);
+    if(ian==N1HFp1e) Fill_N( N1HFp1e,  ibin, qxtrk[0], qytrk[0], qcnt, qx[HFp1e], qy[HFp1e], qx[HFm1e], qy[HFm1e], qx[trackp114], qy[trackp114], sumw[HFp1e], sumw[HFm1e], sumw[trackp114]);
+    if(ian==N1HFp1f) Fill_N( N1HFp1f,  ibin, qxtrk[0], qytrk[0], qcnt, qx[HFp1f], qy[HFp1f], qx[HFm1f], qy[HFm1f], qx[trackp114], qy[trackp114], sumw[HFp1f], sumw[HFm1f], sumw[trackp114]);
     if(ian==N2) Fill_N( N2,  ibin, qxtrk[1], qytrk[1], qcnt, qx[HFp2], qy[HFp2], qx[HFm2], qy[HFm2], qx[trackmid2], qy[trackmid2], sumw[HFp2], sumw[HFm2], sumw[trackmid2]);
+
     if(ian==N3) Fill_N( N3,  ibin, qxtrk[2], qytrk[2], qcnt, qx[HFp3], qy[HFp3], qx[HFm3], qy[HFm3], qx[trackmid3], qy[trackmid3], sumw[HFp3], sumw[HFm3], sumw[trackmid3]);
     if(ian==N4) Fill_N( N4,  ibin, qxtrk[3], qytrk[3], qcnt, qx[HFp4], qy[HFp4], qx[HFm4], qy[HFm4], qx[trackmid4], qy[trackmid4], sumw[HFp4], sumw[HFm4], sumw[trackmid4]);
     if(ian==N5) Fill_N( N5,  ibin, qxtrk[4], qytrk[4], qcnt, qx[HFp5], qy[HFp5], qx[HFm5], qy[HFm5], qx[trackmid5], qy[trackmid5], sumw[HFp5], sumw[HFm5], sumw[trackmid5]);
     if(ian==N6) Fill_N( N6,  ibin, qxtrk[5], qytrk[5], qcnt, qx[HFp6], qy[HFp6], qx[HFm6], qy[HFm6], qx[trackmid6], qy[trackmid6], sumw[HFp6], sumw[HFm6], sumw[trackmid6]);
     if(ian==N7) Fill_N( N7,  ibin, qxtrk[6], qytrk[6], qcnt, qx[HFp7], qy[HFp7], qx[HFm7], qy[HFm7], qx[trackmid7], qy[trackmid7], sumw[HFp7], sumw[HFm7], sumw[trackmid7]);
+
     if(ian==N42)  Fill_N42(N42, ibin, qxtrk[3], qytrk[3], qcnt, qx, qy, sumw);
     if(ian==N42A)  Fill_N42A(N42A, ibin, qxtrk[3], qytrk[3], qcnt, qx, qy, sumw);
     if(ian==N42B)  Fill_N42B(N42B, ibin, qxtrk[3], qytrk[3], qcnt, qx, qy, sumw);
     if(ian==N42C)  Fill_N42C(N42C, ibin, qxtrk[3], qytrk[3], qcnt, qx, qy, sumw);
     if(ian==N523)  Fill_N523(  N523, ibin, qxtrk[4], qytrk[4], qcnt, qx, qy, sumw);
+
     if(ian==N523A) Fill_N523A(N523A, ibin, qxtrk[4], qytrk[4], qcnt, qx, qy, sumw);
     if(ian==N63)   Fill_N63(N63, ibin, qxtrk[5], qytrk[5], qcnt, qx, qy, sumw);
     if(ian==N63A)   Fill_N63A(N63A, ibin, qxtrk[5], qytrk[5], qcnt, qx, qy, sumw);
     if(ian==N63B)   Fill_N63B(N63B, ibin, qxtrk[5], qytrk[5], qcnt, qx, qy, sumw);
     if(ian==N63C)   Fill_N63C(N63C, ibin, qxtrk[5], qytrk[5], qcnt, qx, qy, sumw);
+
     if(ian==N62)   Fill_N62(N62, ibin, qxtrk[5], qytrk[5], qcnt, qx, qy, sumw);
     if(ian==N62A)   Fill_N62A(N62A, ibin, qxtrk[5], qytrk[5], qcnt, qx, qy, sumw);
     if(ian==N723)  Fill_N723(N723,ibin, qxtrk[6], qytrk[6], qcnt, qx, qy, sumw);
     if(ian==N723A) Fill_N723A(N723A,ibin, qxtrk[6], qytrk[6], qcnt, qx, qy, sumw);
     if(ian==D24)   Fill_D24(D24,ibin, qxtrk[1], qytrk[1], qcnt, qx, qy, sumw);
+
     if(ian==D24A)  Fill_D24A(D24A,ibin, qxtrk[1], qytrk[1], qxtrk[1], qytrk[1], qcnt, qx, qy, sumw);
     if(ian==D26)   Fill_D26(D26,ibin, qxtrk[1], qytrk[1], qcnt, qx, qy, sumw);
     if(ian==D26A)   Fill_D26A(D26A,ibin, qxtrk[1], qytrk[1], qcnt, qx, qy, sumw);
     if(ian==D34)   Fill_D34(D34,ibin, qxtrk[2], qytrk[2], qcnt, qx, qy, sumw);
     if(ian==D34A)   Fill_D34A(D34A,ibin, qxtrk[2], qytrk[2],qxtrk[2], qytrk[2], qcnt, qx, qy, sumw);
+
     if(ian==D2232) Fill_D2232(D2232,ibin,  qxtrk[1], qytrk[1], qxtrk[2], qytrk[2], qcnt, qx, qy, sumw);
     if(ian==D2232A)Fill_D2232A(D2232A,ibin, qxtrk[1], qytrk[1], qxtrk[2], qytrk[2], qcnt, qx, qy, sumw);
     if(ian==D2432) Fill_D2432(D2432,ibin,  qxtrk[1], qytrk[1], qxtrk[2], qytrk[2], qcnt, qx, qy, sumw);
     if(ian==D2432A)Fill_D2432A(D2432A,ibin, qxtrk[1], qytrk[1], qxtrk[2], qytrk[2], qcnt, qx, qy, sumw);
-  }
+ }
   
   for(int iorder = 1; iorder <=7; iorder++) {
     int epmin = 0;
