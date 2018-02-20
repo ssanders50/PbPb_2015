@@ -101,12 +101,14 @@ TGraphErrors * N1(int replay, int bin, double eMin, double eMax, double & ymin, 
     epindxA = HFp1f;
     epindxB = HFm1f;
   }
-  cout<<"A: "<<A<<"\t"<<ANALS[A][0]<<"\t"<<EPNames[epindxA]<<"\t"<<EPNames[RCMate1[epindxA]]<<"\t"<<EPNames[RCMate2[epindxA]]<<endl;
-  cout<<"B: "<<B<<"\t"<<ANALS[B][0]<<"\t"<<EPNames[epindxB]<<"\t"<<EPNames[RCMate1[epindxB]]<<"\t"<<EPNames[RCMate2[epindxB]]<<endl;
+  if(epindxA>=0) {
+    cout<<"A: "<<A<<"\t"<<ANALS[A][0]<<"\t"<<EPNames[epindxA]<<"\t"<<EPNames[RCMate1[epindxA]]<<"\t"<<EPNames[RCMate2[epindxA]]<<endl;
+    cout<<"B: "<<B<<"\t"<<ANALS[B][0]<<"\t"<<EPNames[epindxB]<<"\t"<<EPNames[RCMate1[epindxB]]<<"\t"<<EPNames[RCMate2[epindxB]]<<endl;
+  }
   //
   // Start with eta distribution
   //
-  if(A<0){
+  if(epindxA<0){
     for(int i = 0; i<12; i++) {
       double EtaMin = -2.4 + 0.4*i;
       double EtaMax = EtaMin+0.4;
@@ -145,7 +147,7 @@ TGraphErrors * N1(int replay, int bin, double eMin, double eMax, double & ymin, 
   //
   // Now do requested calculation
   //
-  if(A<0){
+  if(epindxA<0){
     g = GetVNPt(replay,bin,epindxA,eMin,eMax,gA, gB, gSpec, vint, vinte,vintA, vintAe, vintB, vintBe, false);
     ymin = setYmin(g,gA,gB);
     ymax = setYmax(g,gA,gB);
