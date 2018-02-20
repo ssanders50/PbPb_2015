@@ -63,5 +63,11 @@ TGraphErrors * N123(int replay, int bin, double eMin, double eMax, double & ymin
     gint->GetY()[ie] = gintA->GetY()[ie];
     gint->GetEY()[ie] = gintA->GetEY()[ie];
 }
+  gint->SetName("gint");
+  gintA->SetName("gintA");
+  gintB->SetName("gintB");
+  g->SetName("g");
+  gA->SetName("gA");
+  gB->SetName("gB");
   return g;
 }

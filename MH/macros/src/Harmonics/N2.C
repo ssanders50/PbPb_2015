@@ -31,7 +31,9 @@ TGraphErrors * N2(int replay, int bin, double eMin, double eMax, double & ymin, 
       gintB->SetTitle("p-side");
     }
   }
-
+  gint->SetName("gint");
+  gintA->SetName("gintA");
+  gintB->SetName("gintB");
   //
   // Now do requested calculation
   //
@@ -55,6 +57,8 @@ TGraphErrors * N2(int replay, int bin, double eMin, double eMax, double & ymin, 
       gB->SetTitle("p-side");
     }
   }
-  
+  g->SetName("g");
+  gA->SetName("gA");
+  gB->SetName("gB");
   return g;
 }

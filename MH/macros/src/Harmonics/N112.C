@@ -29,7 +29,9 @@ TGraphErrors * N112(int replay, int bin, double eMin, double eMax, double & ymin
   double res2A = 0;
   double res2B = 0;
   double res2 = 0;
-  if(replay==N112ASUB2 || replay == N112BSUB2 || replay == N112SUB2) {
+  cout<<"replay: "<<replay<<endl;
+  cout<<ANALS[replay][0]<<endl;
+  if(ANALS[replay][0].find("SUB2")!=std::string::npos) {
     gtmp = GetVNPt(N2SUB2,bin,-1,EtaMin,EtaMax,gtmp,gtmp,gtmp,v2int,v2inte,v2intA,v2intAe,v2intB,v2intBe,false);
   } else {
     gtmp = GetVNPt(N2SUB3,bin,-1,EtaMin,EtaMax,gtmp,gtmp,gtmp,v2int,v2inte,v2intA,v2intAe,v2intB,v2intBe,false);
@@ -40,11 +42,29 @@ TGraphErrors * N112(int replay, int bin, double eMin, double eMax, double & ymin
   fin->Close();
   fin = new TFile(rootFile.data(),"r");
   cout<<"res2: "<<res2A<<"\t"<<res2B<<endl;
-  
+  int A = -1;
+  int B = -1;
+  if(replay==N112SUB2) {A=N112ASUB2; B=N112BSUB2;}
+  if(replay==N112SUB3) {A=N112ASUB3; B=N112BSUB3;}
+  if(replay==N112cSUB2) {A=N112AcSUB2; B=N112BcSUB2;}
+  if(replay==N112cSUB3) {A=N112AcSUB3; B=N112BcSUB3;}
+  if(replay==N112dSUB2) {A=N112AdSUB2; B=N112BdSUB2;}
+  if(replay==N112dSUB3) {A=N112AdSUB3; B=N112BdSUB3;}
+  if(replay==N112eSUB2) {A=N112AeSUB2; B=N112BeSUB2;}
+  if(replay==N112eSUB3) {A=N112AeSUB3; B=N112BeSUB3;}
+  if(replay==N112fSUB2) {A=N112AfSUB2; B=N112BfSUB2;}
+  if(replay==N112fSUB3) {A=N112AfSUB3; B=N112BfSUB3;}
+  if(replay==EP112SUB2) {A=EP112ASUB2; B=EP112BSUB2;}
+  if(replay==EP112SUB3) {A=EP112ASUB3; B=EP112BSUB3;}
+  if(A>=0) {
+    cout<<"A: "<<A<<"\t"<<ANALS[A][0]<<endl;
+    cout<<"B: "<<B<<"\t"<<ANALS[B][0]<<endl;
+  }
+
   //
   // Start with eta distribution
   //
-  if(replay == N112ASUB2 || replay == N112ASUB3 || replay == N112BSUB2 || replay == N112BSUB3){
+  if(A<0){
     for(int i = 0; i<12; i++) {
       double EtaMin = -2.4 + 0.4*i;
       double EtaMax = EtaMin+0.4;
@@ -71,11 +91,7 @@ TGraphErrors * N112(int replay, int bin, double eMin, double eMax, double & ymin
       double EtaMax = EtaMin+0.4;
       if(fabs(EtaMin)<0.001) EtaMin = 0.;
       if(fabs(EtaMax)<0.001) EtaMax = 0.;
-      if(replay == N112SUB2) { 
-	g = GetVNPt(N112ASUB2,bin,epindx,EtaMin,EtaMax,gtmp, gtmp, gtmp, vint, vinte,vintA, vintAe, vintB, vintBe, false);
-      }  else {
-	g = GetVNPt(N112ASUB3,bin,epindx,EtaMin,EtaMax,gtmp, gtmp, gtmp, vint, vinte, vintA, vintAe, vintB, vintBe,false);
-      }
+      g = GetVNPt(A,bin,epindx,EtaMin,EtaMax,gtmp, gtmp, gtmp, vint, vinte,vintA, vintAe, vintB, vintBe, false);
       vint/=res2;
       vinte/=res2;
       vintA/=res2;
@@ -84,11 +100,7 @@ TGraphErrors * N112(int replay, int bin, double eMin, double eMax, double & ymin
       vintBe/=res2;
       fin->Close();
       fin = new TFile(rootFile.data(),"r");
-      if(replay == N112SUB2) { 
-	g2 = GetVNPt(N112BSUB2,bin,epindx,EtaMin,EtaMax,gtmp, gtmp, gtmp, vint2, vinte2,vintA2, vintAe2, vintB2, vintBe2, false);
-      }  else {
-	g2 = GetVNPt(N112BSUB3,bin,epindx,EtaMin,EtaMax,gtmp, gtmp, gtmp, vint2, vinte2,vintA2, vintAe2, vintB2, vintBe2, false);
-      }
+      g2 = GetVNPt(B,bin,epindx,EtaMin,EtaMax,gtmp, gtmp, gtmp, vint2, vinte2,vintA2, vintAe2, vintB2, vintBe2, false);
       vint2/=res2;
       vinte2/=res2;
       vintA2/=res2;
@@ -106,12 +118,14 @@ TGraphErrors * N112(int replay, int bin, double eMin, double eMax, double & ymin
     }
     
   }
-
+  gint->SetName("gint");
+  gintA->SetName("gintA");
+  gintB->SetName("gintB");
   //
   // Now do requested calculation
   //
 
-  if(replay == N112ASUB2 || replay == N112ASUB3 || replay == N112BSUB2 || replay == N112BSUB3){
+  if(A<0){
     g = GetVNPt(replay,bin,epindx,eMin,eMax,gA, gB, gSpec, vint, vinte, vintA2, vintAe2, vintB2, vintBe2,false);
     ymin = setYmin(g,gA,gB);
     ymax = setYmax(g,gA,gB);
@@ -121,18 +135,10 @@ TGraphErrors * N112(int replay, int bin, double eMin, double eMax, double & ymin
     fclose(outint);
     return g;
   }
-  if(replay == N112SUB2) { 
-    g = GetVNPt(N112ASUB2,bin,epindx,eMin,eMax,gA, gB, gSpec, vint, vinte,vintA2, vintAe2, vintB2, vintBe2, false);
-  }  else {
-    g = GetVNPt(N112ASUB3,bin,epindx,eMin,eMax,gA, gB, gSpec, vint, vinte, vintA2, vintAe2, vintB2, vintBe2,false);
-  }
+  g = GetVNPt(A,bin,epindx,eMin,eMax,gA, gB, gSpec, vint, vinte,vintA2, vintAe2, vintB2, vintBe2, false);
   fin->Close();
   fin = new TFile(rootFile.data(),"r");
-  if(replay == N112SUB2) { 
-    g2 = GetVNPt(N112BSUB2,bin,epindx,eMin,eMax,gA2, gB2, gSpec2, vint2, vinte2,vintA2, vintAe2, vintB2, vintBe2, false);
-  }  else {
-    g2 = GetVNPt(N112BSUB3,bin,epindx,eMin,eMax,gA2, gB2, gSpec2, vint2, vinte2, vintA2, vintAe2, vintB2, vintBe2,false);
-  }
+    g2 = GetVNPt(B,bin,epindx,eMin,eMax,gA2, gB2, gSpec2, vint2, vinte2,vintA2, vintAe2, vintB2, vintBe2, false);
   fin->Close();
   //Only A has the correct symmetry...
   for(int i = 0; i<g->GetN(); i++) {
@@ -145,5 +151,8 @@ TGraphErrors * N112(int replay, int bin, double eMin, double eMax, double & ymin
   }
   ymin = setYmin(g,gA,gB);
   ymax = setYmax(g,gA,gB);
+  g->SetName("g");
+  gA->SetName("gA");
+  gB->SetName("gB");
   return g;
 }

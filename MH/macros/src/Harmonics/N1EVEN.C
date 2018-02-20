@@ -130,6 +130,9 @@ if(ANALS[nrep][0].find("MCp02")!=std::string::npos) {
     gintA->SetTitle(lepA.data());
     gintB->SetTitle(lepB.data());
   }
+  gint->SetName("gint");
+  gintA->SetName("gintA");
+  gintB->SetName("gintB");
   //
   // Now do requested calculation
   //
@@ -188,5 +191,8 @@ if(ANALS[nrep][0].find("MCp02")!=std::string::npos) {
   }
   if(VNMIN>-10) ymin=VNMIN;
   if(VNMAX>-10) ymax=VNMAX;
+  g->SetName("g");
+  gA->SetName("gA");
+  gB->SetName("gB");
   return g;
 }

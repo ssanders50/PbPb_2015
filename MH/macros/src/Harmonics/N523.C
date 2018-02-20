@@ -24,6 +24,9 @@ TGraphErrors * N523(int replay, int bin, double eMin, double eMax, double & ymin
     gintB->GetY()[i]=vintB;
     gintB->GetEY()[i]=vintBe;
   }
+  gint->SetName("gint");
+  gintA->SetName("gintA");
+  gintB->SetName("gintB");
   //
   // Now do requested calculation
   //
@@ -34,5 +37,8 @@ TGraphErrors * N523(int replay, int bin, double eMin, double eMax, double & ymin
   outint = fopen(soutint.data(),"a+");
   fprintf(outint,"%d\t%d\t%15.10f\t%15.10f\n",cmin[bin],cmax[bin],vint,vinte);
   fclose(outint);
+  g->SetName("g");
+  gA->SetName("gA");
+  gB->SetName("gB");
   return g;
 }
