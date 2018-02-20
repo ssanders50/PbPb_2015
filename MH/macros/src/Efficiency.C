@@ -1,4 +1,4 @@
-enum    TrackType {typeUndefined = 0, ppReco = 1, HIReco, Pixel};
+enum    TrackType {typeUndefined = 0, ppReco = 1, HIReco, Pixel, MC};
 enum TrackQuality {qualityUndefined = 0, loose = 1, normal, tight, narrow, wide};
 enum TrackReaction {reacUndefined = 0, pp = 1, pPb, XeXe, PbPb};
 enum TrackOrientation {orientationUndefined = 0, Type_pPb = 1, Type_Pbp };
@@ -28,6 +28,7 @@ TrackType SetTracking( ){
   system("rm pwd.lis");
   string spwd = buf;
   cout<<spwd<<endl;
+  if(spwd.find("AMPT")!=std::string::npos) sTrackType = MC;
   if(spwd.find("pp")!=std::string::npos) {
     sTrackReaction=pp;
     cout<<"System: pp"<<endl;
@@ -64,7 +65,7 @@ TrackType SetTracking( ){
   int indx = 0;
   sTrackType = typeUndefined;
   sTrackQuality = qualityUndefined;
-  while(l->At(indx) != l->Last()) {
+  while(l->At(indx) != l->Last() && sTrackType!=MC) {
     string condition = l->At(indx++)->GetName();
     if(condition == "hiGeneralAndPixelTracks") sTrackType = Pixel;
     if(condition == "hiGeneralTracks") sTrackType = HIReco;
@@ -76,6 +77,11 @@ TrackType SetTracking( ){
       if(condition == "dzdzerror_0001.50") sTrackQuality = tight;
     } else if (sTrackType == ppReco || sTrackReaction == pPb) {
       cout<<"pPb with ppReco: "<<condition<<":"<<endl;
+      if(condition == "dzdzerror_0003.00") sTrackQuality = normal;
+      if(condition == "dzdzerror_0005.00") sTrackQuality = loose;
+      if(condition == "dzdzerror_0002.00") sTrackQuality = tight;
+    } else if (sTrackType == ppReco || sTrackReaction == XeXe) {
+      cout<<"XeXe with ppReco: "<<condition<<":"<<endl;
       if(condition == "dzdzerror_0003.00") sTrackQuality = normal;
       if(condition == "dzdzerror_0005.00") sTrackQuality = loose;
       if(condition == "dzdzerror_0002.00") sTrackQuality = tight;
@@ -146,8 +152,16 @@ TrackType SetTracking( ){
     } 
   } else if (sTrackReaction==XeXe) {
     if(sTrackQuality == normal) {
-      effFile = new TFile("EffAndFake/XeXe/XeXe_eff_table_92x_cent.root");
-    }
+      effFile = new TFile("EffAndFake/XeXe/XeXe_eff_table_94x_cent.root");
+    } else if (sTrackQuality == loose) {
+      effFile = new TFile("EffAndFake/XeXe/XeXe_eff_loose_table_94x_cent.root");
+    } else if (sTrackQuality == tight) {
+      effFile = new TFile("EffAndFake/XeXe/XeXe_eff_tight_table_94x_cent.root");
+    } else if (sTrackQuality == narrow) {
+      effFile = new TFile("EffAndFake/XeXe/XeXe_eff_narrow_table_94x_cent.root");
+    } else if (sTrackQuality == wide) {
+      effFile = new TFile("EffAndFake/XeXe/XeXe_eff_wide_table_94x_cent.root");
+    } 
   }
   if(effFile!=NULL) {
     cout<<"Efficiency File: "<<effFile->GetName()<<endl;
@@ -160,11 +174,14 @@ TrackType SetTracking( ){
   cen->SetDirectory(0);
   cene->SetDirectory(0);
   ceneXeXe->SetDirectory(0);
-   
+  if(sTrackType==MC) effFile = NULL;
   return sTrackType;
 }
 double FakeAndEff(int cent, double pt, double emin, double emax, double &eff) {
   eff = 1.;
+  if(sTrackType==MC) {
+    return 0;
+  }
   double val = 0;
   double holdemin = emin;
   double holdemax = emax;
@@ -233,5 +250,6 @@ TH2D * ptcntEff(TH2D * ptcnt, double cent) {
       hsEff->SetBinContent(i,j,ptcnt->GetBinContent(i,j)/eff);
     }
   }
+  if(sTrackType==MC) cout<<"Set FakeAndEff = 0, 1 for MC calculation"<<endl;
   return hsEff ;
 }
