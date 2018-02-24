@@ -239,20 +239,20 @@ void GetVNCreate(int replay , int bin , TGraphErrors * & gint, TGraphErrors * & 
     if(strncmp(gA->GetTitle(),"NOGOOD",6)!=0) gA->Draw("p");
     if(strncmp(gB->GetTitle(),"NOGOOD",6)!=0) gB->Draw("p");
     if(strncmp(g->GetTitle(),"NOGOOD",6)!=0) g->Draw("p");
-    TLatex * text = new TLatex(0.1*PTMAX,0.90*ymax,ANALS[replay][0].data());
+    TLatex * text = new TLatex(0.1*PTMAX,0.92*ymax,ANALS[replay][0].data());
     text->SetTextFont(43);
     text->SetTextSize(24);
     text->Draw();
     TLatex * t2;
     if(ntrkbinning) {
-      t2 = new TLatex(0.1*PTMAX,0.85*(ymax-ymin)+ymin,Form("%d #leq N_{tkr}^{off} < %d",cmin[bin],cmax[bin]));
+      t2 = new TLatex(0.1*PTMAX,0.87*(ymax-ymin)+ymin,Form("%d #leq N_{tkr}^{off} < %d",cmin[bin],cmax[bin]));
     } else {
-      t2 = new TLatex(0.1*PTMAX,0.85*(ymax-ymin)+ymin,Form("%d - %d%c",cmin[bin],cmax[bin],'%'));
+      t2 = new TLatex(0.1*PTMAX,0.87*(ymax-ymin)+ymin,Form("%d - %d%c",cmin[bin],cmax[bin],'%'));
     }
     t2->SetTextFont(43);
     t2->SetTextSize(20);
     t2->Draw();
-    TLatex * t3 = new TLatex(0.1*PTMAX,0.80*(ymax-ymin)+ymin,Form("%03.1f < #eta < %03.1f",EtaMin,EtaMax));
+    TLatex * t3 = new TLatex(0.1*PTMAX,0.82*(ymax-ymin)+ymin,Form("%03.1f < #eta < %03.1f",EtaMin,EtaMax));
     t3->SetTextFont(43);
     t3->SetTextSize(20);
     t3->Draw();
@@ -300,7 +300,7 @@ void GetVN(string rootfile = "../MH.root", string name="N2SUB3",  double mineta 
   VNINTMAX=vnintmax;
   string nlabel = name;
   if(name.find("SUB2")!=std::string::npos) Decor = false;
-  if(name.find("N1MC")!=std::string::npos) Decor = false;
+  //if(name.find("N1MC")!=std::string::npos) Decor = false;
   if(name.find("N523")!=std::string::npos) Decor = false;
   if(name.find("N42")!=std::string::npos) Decor = false;
   if(name.find("N62")!=std::string::npos) Decor = false;
@@ -309,6 +309,7 @@ void GetVN(string rootfile = "../MH.root", string name="N2SUB3",  double mineta 
   rootFile = rootfile;
   SetTracking();
   tag = rootfile.substr(rootfile.find("/")+1,rootfile.find(".root")-rootfile.find("/")-1);
+  if(Decor) tag+="_decor";
   string outname = tag+"_hists.root";
   tout = new TFile(outname.data(),"UPDATE");
   TGraphErrors * gint[cbins];
@@ -479,12 +480,12 @@ void GetVN(string rootfile = "../MH.root", string name="N2SUB3",  double mineta 
 
 
     leg2->Draw();
-    TLatex * tl = new TLatex( -2,0.8*(ymax-ymin)+ymin,nl3.data());
+    TLatex * tl = new TLatex( -2.3,0.9*(ymax-ymin)+ymin,nl3.data());
     tl->Draw();
     if(ANALS[en][2]!="") {
       string tmp = ANALS[en][2];
       if(Decor) tmp+=" (EP Decorrelation corrected)";
-      TLatex * tl2 = new TLatex( -2,0.75*(ymax-ymin)+ymin,tmp.data());
+      TLatex * tl2 = new TLatex( -2.3,0.85*(ymax-ymin)+ymin,tmp.data());
       tl2->SetTextFont(43);
       tl2->SetTextSize(16);
       tl2->Draw();
