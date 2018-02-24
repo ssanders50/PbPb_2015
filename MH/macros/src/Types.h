@@ -36,8 +36,8 @@ static const string ANALS[250][3] {
 //1
     "N1SUB2",             "v_{1}\{#Psi_{1}}",    "2 sub-event resolution - HF+ summed with HF-",
     "N1SUB3",             "v_{1}\{#Psi_{1}}",    "3 sub-event resolution - HF+ summed with HF-",
-"N1EVENSUB2",      "v_{1}^{even}\{#Psi_{1}}",    "",
-"N1EVENSUB3",      "v_{1}^{even}\{#Psi_{1}}",                                 "",
+"N1EVENSUB2",      "v_{1}^{even}\{#Psi_{1}}",    "2 sub-event with mom. cons. weights",
+"N1EVENSUB3",      "v_{1}^{even}\{#Psi_{1}}",                                 "3 sub-event with mom. cons. weights",
    "N1ASUB2",             "v_{1}\{#Psi_{1}}",     "2 sub-event resolution - need to add to N1B",
 //2
    "N1ASUB3",  "v_{1}\{#Psi_{1}}", "3 sub-event resolution - HFp1-HFm1-trackp114",
