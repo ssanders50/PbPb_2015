@@ -10,7 +10,7 @@ TGraphErrors * N1EVEN(int replay, int bin, double eMin, double eMax, double & ym
   int pRef3 = N1MCp22SUB3;
   int mRef2 = N1MCm22SUB2;
   int mRef3 = N1MCm22SUB3;
-  int ioff = 1;
+  int ioff = 0;
 
   string lepA = "";
   string lepB = "";
@@ -18,8 +18,14 @@ TGraphErrors * N1EVEN(int replay, int bin, double eMin, double eMax, double & ym
   if(sTrackOrientation==Type_pPb && ANALS[replay][0].find("MCp")!=std::string::npos) pref = "p-side ";
   if(sTrackOrientation==Type_pPb && ANALS[replay][0].find("MCm")!=std::string::npos) pref = "Pb-side ";
   int nrep = replay;
-  if(replay==N1EVENSUB2 || replay==N1EVENSUB3) nrep = pRef2;
-
+  if(replay==N1EVENSUB2 || replay==N1EVENSUB3) {
+    nrep = pRef2;
+    if(eMax>=0) {
+      epindx = trackm122mc;
+    } else {
+      epindx = trackp122mc;
+    }
+  }
   if(ANALS[nrep][0].find("MCm22")!=std::string::npos) {
     lepA = pref+"(-2.4<#eta<-2.0)";
     lepB = pref+"(2.0<#eta<2.4)";
@@ -74,11 +80,12 @@ if(ANALS[nrep][0].find("MCp02")!=std::string::npos) {
     if(ANALS[nrep][0].find("SUB2")!=std::string::npos) lepA+=" NG - Use SUB3";
   }
   
-  Decor = false;
+//Decor = false;
   //
   // Start with eta distribution
   //
   if(replay==N1EVENSUB2 || replay==N1EVENSUB3) {
+    if(Decor)ioff=1;
     for(int i = 0+ioff; i<12-ioff; i++) {
       double EtaMin = -2.4 + 0.4*i;
       double EtaMax = EtaMin+0.4;
@@ -87,7 +94,10 @@ if(ANALS[nrep][0].find("MCp02")!=std::string::npos) {
       if(i<6) {
 	int rep = pRef2;
 	if(replay==N1EVENSUB3) rep = pRef3;
-	gtmp = GetVNPt(rep,bin,epindx,EtaMin,EtaMax,gtmp, gtmp, gtmp, vint, vinte, vintA, vintAe, vintB, vintBe, false);
+	gtmp = GetVNPt(rep,bin,trackp122mc,EtaMin,EtaMax,gtmp, gtmp, gtmp, vint, vinte, vintA, vintAe, vintB, vintBe, false);
+	gint->GetX()[i-ioff] = gint->GetX()[i];
+	gintA->GetX()[i-ioff] = gintA->GetX()[i];
+	gintB->GetX()[i-ioff] = gintB->GetX()[i];
 	gint->GetY()[i-ioff] = vintA;
 	gint->GetEY()[i-ioff] = vintAe;
 	gintA->GetY()[i-ioff] = vintA;
@@ -100,7 +110,10 @@ if(ANALS[nrep][0].find("MCp02")!=std::string::npos) {
       } else {
 	int rep = mRef2;
 	if(replay==N1EVENSUB3) rep = mRef3;
-	gtmp = GetVNPt(rep,bin,epindx,EtaMin,EtaMax,gtmp, gtmp, gtmp, vint, vinte, vintA, vintAe, vintB, vintBe, false);
+	gtmp = GetVNPt(rep,bin,trackm122mc,EtaMin,EtaMax,gtmp, gtmp, gtmp, vint, vinte, vintA, vintAe, vintB, vintBe, false);
+	gint->GetX()[i-ioff] = gint->GetX()[i];
+	gintA->GetX()[i-ioff] = gintA->GetX()[i];
+	gintB->GetX()[i-ioff] = gintB->GetX()[i];
 	gint->GetY()[i-ioff] = vintA;
 	gint->GetEY()[i-ioff] = vintAe;
 	gintA->GetY()[i-ioff] = vintB;
