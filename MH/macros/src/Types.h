@@ -17,19 +17,16 @@ enum AnalTypes{
       D2232SUB2,   D2232ASUB2,        Chi62,      Chi62A,      D26SUB2,  //16  
        D26ASUB2,        Chi63,       Chi63A,     D34SUB2,     D34ASUB2,  //17
 	   Chi7,        Chi7A,    D2432SUB2,  D2432ASUB2,     N723SUB2,  //18
-       N723SUB3,    N723ASUB2,    N723ASUB3,  N1HFm1cSUB2,  N1HFm1dSUB2, //19 
-    N1HFm1eSUB2,  N1HFm1fSUB2,  N1HFm1cSUB3,  N1HFm1dSUB3,  N1HFm1eSUB3, //20
-    N1HFm1fSUB3,  N1HFp1cSUB2,  N1HFp1dSUB2,  N1HFp1eSUB2,  N1HFp1fSUB2, //21
-    N1HFp1cSUB3,  N1HFp1dSUB3,  N1HFp1eSUB3,  N1HFp1fSUB3,    N1HFcSUB2, //22 
-      N1HFdSUB2,    N1HFeSUB2,    N1HFfSUB2,	N1HFcSUB3,    N1HFdSUB3, //23
-      N1HFeSUB3,    N1HFfSUB3,    EP112SUB2,    EP112SUB3,   EP112ASUB2, //24 
-     EP112ASUB3,   EP112BSUB2,   EP112BSUB3,  	N112cSUB2,    N112cSUB3, //25 
-     N112AcSUB2,   N112AcSUB3,   N112BcSUB2,   N112BcSUB3,    N112dSUB2, //26 
-      N112dSUB3,   N112AdSUB2,   N112AdSUB3,   N112BdSUB2,   N112BdSUB3, //27
-      N112eSUB2,    N112eSUB3,   N112AeSUB2,   N112AeSUB3,   N112BeSUB2, //28 
-     N112BeSUB3,    N112fSUB2,    N112fSUB3,   N112AfSUB2,   N112AfSUB3, //29
-     N112BfSUB2,   N112BfSUB3, //30
-    LAST
+       N723SUB3,    N723ASUB2,    N723ASUB3, N1HFm1cSUB2,  N1HFm1dSUB2,  //19 
+    N1HFm1eSUB2,  N1HFm1fSUB2,  N1HFm1gSUB2, N1HFm1cSUB3,  N1HFm1dSUB3,  //20
+    N1HFm1eSUB3,  N1HFm1fSUB3,  N1HFm1gSUB3, N1HFp1cSUB2,  N1HFp1dSUB2,  //21  
+    N1HFp1eSUB2,  N1HFp1fSUB2,  N1HFp1gSUB2, N1HFp1cSUB3,  N1HFp1dSUB3,  //22  
+    N1HFp1eSUB3,  N1HFp1fSUB3,  N1HFp1gSUB3,   N1HFcSUB2,    N1HFdSUB2,  //23    
+      N1HFeSUB2,    N1HFfSUB2,    N1HFgSUB2,   N1HFcSUB3,    N1HFdSUB3,  //24    
+      N1HFeSUB3,    N1HFfSUB3,    N1HFgSUB3,   N112CSUB2,    N112CSUB3,  //25
+      N112DSUB2,    N112DSUB3,    N112CombinedSUB2,   N112CombinedSUB3,  // 26
+	 N112ESUB2,    N112ESUB3,    N112FSUB2,   N112FSUB3,   N112GSUB2,   //27
+	 N112GSUB3,    N112HSUB2,    N112HSUB3,N112MCASUB2, N112MCASUB3,     LAST  //28
 };
 
 static const string ANALS[250][3] {
@@ -58,13 +55,13 @@ static const string ANALS[250][3] {
     "N7SUB2",  "v_{7}\{#Psi_{7}}", "2 sub-event resolution",
     "N7SUB3",  "v_{7}\{#Psi_{7}}", "3 sub-event resolution",
 //5      
-  "N112SUB2",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",  "Correctly combines 112A and 112B",
-  "N112SUB3",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",  "Correctly combines 112A and 112B",
-  "N112ASUB2",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",  "qA is the correct version, n=1 in HF+",
-  "N112ASUB3",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",  "qA is the correct version, n=1 in HF+",
-  "N112BSUB2",  "v_{1}\{#Psi_{1B},#Psi_{2B}}",  "qA is the correct version, n=1 in HF-",
+  "N112SUB2",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",  "Based on STAR analysis",
+  "N112SUB3",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",  "Based on STAR analysis",
+  "N112ASUB2",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",  "1A (4<#eta<5) 2A (-0.8<#eta<0.8)",
+  "N112ASUB3",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",  "1A (4<#eta<5) 1C (-1.6<#eta<-1.2) 2A (-0.8<#eta<0.8)",
+  "N112BSUB2",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",  "1A (-5<#eta<-4) 2A (-0.8<<#eta<0.8)",
 //6    
-  "N112BSUB3",  "v_{1}\{#Psi_{1B},#Psi_{2B}}",  "qA is the correct version, n=1 in HF-",
+  "N112BSUB3",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",  "1A (-5<#eta<-4) 1C (1.2<#eta<1.6) 2A (-0.8<<#eta<0.8)",
    "N523SUB2",  "v_{5}\{#Psi_{2A},#Psi_{3A}}",  "A side is HF+",
    "N523SUB3",  "v_{5}\{#Psi_{2A},#Psi_{3A}}",  "A side is HF+",
    "N523ASUB2", "v_{5}\{#Psi_{2A},#Psi_{3B}}",  "A side is HF+",
@@ -150,65 +147,53 @@ static const string ANALS[250][3] {
 //20
     "N1HFm1eSUB2",             "v_{1}\{#Psi_{1}}",    "2 sub-event resolution",
     "N1HFm1fSUB2",             "v_{1}\{#Psi_{1}}",    "2 sub-event resolution",
+    "N1HFm1gSUB2",             "v_{1}\{#Psi_{1}}",    "2 sub-event resolution",
     "N1HFm1cSUB3",             "v_{1}\{#Psi_{1}}",    "3 sub-event resolution",
     "N1HFm1dSUB3",             "v_{1}\{#Psi_{1}}",    "3 sub-event resolution",
-    "N1HFm1eSUB3",             "v_{1}\{#Psi_{1}}",    "3 sub-event resolution",
 //21
+    "N1HFm1eSUB3",             "v_{1}\{#Psi_{1}}",    "3 sub-event resolution",
     "N1HFm1fSUB3",             "v_{1}\{#Psi_{1}}",    "3 sub-event resolution",
+    "N1HFm1gSUB3",             "v_{1}\{#Psi_{1}}",    "3 sub-event resolution",
     "N1HFp1cSUB2",             "v_{1}\{#Psi_{1}}",    "2 sub-event resolution",
     "N1HFp1dSUB2",             "v_{1}\{#Psi_{1}}",    "2 sub-event resolution",
+//22
     "N1HFp1eSUB2",             "v_{1}\{#Psi_{1}}",    "2 sub-event resolution",
     "N1HFp1fSUB2",             "v_{1}\{#Psi_{1}}",    "2 sub-event resolution ",
-//22
+    "N1HFp1gSUB2",             "v_{1}\{#Psi_{1}}",    "2 sub-event resolution ",
     "N1HFp1cSUB3",             "v_{1}\{#Psi_{1}}",    "3 sub-event resolution",
     "N1HFp1dSUB3",             "v_{1}\{#Psi_{1}}",    "3 sub-event resolution",
+//23
     "N1HFp1eSUB3",             "v_{1}\{#Psi_{1}}",    "3 sub-event resolution",
     "N1HFp1fSUB3",             "v_{1}\{#Psi_{1}}",    "3 sub-event resolution",
+    "N1HFp1gSUB3",             "v_{1}\{#Psi_{1}}",    "3 sub-event resolution",
       "N1HFcSUB2",             "v_{1}\{#Psi_{1}}",    "2 sub-event resolution - HF+ summed with HF-",
-//23
     "N1HFdSUB2",             "v_{1}\{#Psi_{1}}",    "2 sub-event resolution - HF+ summed with HF-",
+//24
     "N1HFeSUB2",             "v_{1}\{#Psi_{1}}",    "2 sub-event resolution - HF+ summed with HF-",
     "N1HFfSUB2",             "v_{1}\{#Psi_{1}}",    "2 sub-event resolution - HF+ summed with HF-",
+    "N1HFgSUB2",             "v_{1}\{#Psi_{1}}",    "2 sub-event resolution - HF+ summed with HF-",
     "N1HFcSUB3",             "v_{1}\{#Psi_{1}}",    "3 sub-event resolution - HF+ summed with HF-",
     "N1HFdSUB3",             "v_{1}\{#Psi_{1}}",    "3 sub-event resolution - HF+ summed with HF-",
-//24
+//25
     "N1HFeSUB3",             "v_{1}\{#Psi_{1}}",    "3 sub-event resolution - HF+ summed with HF-",
     "N1HFfSUB3",             "v_{1}\{#Psi_{1}}",    "3 sub-event resolution - HF+ summed with HF-",
-    "EP112SUB2",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",  "Correctly combines 112A and 112B",
-    "EP112SUB3",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",  "Correctly combines 112A and 112B",
-   "EP112ASUB2",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",  "qA is the correct version, n=1 in HF+",
-//25
-  "EP112ASUB3",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",  "qA is the correct version, n=1 in HF+",
-  "EP112BSUB2",  "v_{1}\{#Psi_{1B},#Psi_{2B}}",  "qA is the correct version, n=1 in HF-",    
-  "EP112BSUB3",  "v_{1}\{#Psi_{1B},#Psi_{2B}}",  "qA is the correct version, n=1 in HF-",
-  "N112cSUB2",  "v_{1}\{#Psi_{1Ac},#Psi_{2Ac}}",  "Correctly combines 112A and 112B",
-  "N112cSUB3",  "v_{1}\{#Psi_{1Ac},#Psi_{2Ac}}",  "Correctly combines 112A and 112B",
-//26
-  "N112AcSUB2",  "v_{1}\{#Psi_{1Ac},#Psi_{2Ac}}",  "qA is the correct version, n=1 in HF+",
-  "N112AcSUB3",  "v_{1}\{#Psi_{1Ac},#Psi_{2Ac}}",  "qA is the correct version, n=1 in HF+",
-  "N112BcSUB2",  "v_{1}\{#Psi_{1Bc},#Psi_{2Bc}}",  "qA is the correct version, n=1 in HF-",    
-  "N112BcSUB3",  "v_{1}\{#Psi_{1Bc},#Psi_{2Bc}}",  "qA is the correct version, n=1 in HF-",
-  "N112dSUB2",  "v_{1}\{#Psi_{1Ad},#Psi_{2Ad}}",  "Correctly combines 112A and 112B",
-//27
-  "N112dSUB3",  "v_{1}\{#Psi_{1Ad},#Psi_{2Ad}}",  "Correctly combines 112A and 112B",
-  "N112AdSUB2",  "v_{1}\{#Psi_{1Ad},#Psi_{2Ad}}",  "qA is the correct version, n=1 in HF+",
-  "N112AdSUB3",  "v_{1}\{#Psi_{1Ad},#Psi_{2Ad}}",  "qA is the correct version, n=1 in HF+",
-  "N112BdSUB2",  "v_{1}\{#Psi_{1Bd},#Psi_{2Bd}}",  "qA is the correct version, n=1 in HF-",    
-  "N112BdSUB3",  "v_{1}\{#Psi_{1Bd},#Psi_{2Bd}}",  "qA is the correct version, n=1 in HF-",
-//28
-  "N112eSUB2",  "v_{1}\{#Psi_{1Ae},#Psi_{2Ae}}",  "Correctly combines 112A and 112B",
-  "N112eSUB3",  "v_{1}\{#Psi_{1Ae},#Psi_{2Ae}}",  "Correctly combines 112A and 112B",
-  "N112AeSUB2",  "v_{1}\{#Psi_{1Ae},#Psi_{2Ae}}",  "qA is the correct version, n=1 in HF+",
-  "N112AeSUB3",  "v_{1}\{#Psi_{1Ae},#Psi_{2Ae}}",  "qA is the correct version, n=1 in HF+",
-  "N112BeSUB2",  "v_{1}\{#Psi_{1Be},#Psi_{2Be}}",  "qA is the correct version, n=1 in HF-",    
-//29
-  "N112BeSUB3",  "v_{1}\{#Psi_{1Be},#Psi_{2Be}}",  "qA is the correct version, n=1 in HF-",
-  "N112fSUB2",  "v_{1}\{#Psi_{1Af},#Psi_{2Af}}",  "Correctly combines 112A and 112B",
-  "N112fSUB3",  "v_{1}\{#Psi_{1Af},#Psi_{2Af}}",  "Correctly combines 112A and 112B",
-  "N112AfSUB2",  "v_{1}\{#Psi_{1Af},#Psi_{2Af}}",  "qA is the correct version, n=1 in HF+",
-  "N112AfSUB3",  "v_{1}\{#Psi_{1Af},#Psi_{2Af}}",  "qA is the correct version, n=1 in HF+",
-//30
-  "N112BfSUB2",  "v_{1}\{#Psi_{1Bf},#Psi_{2Bf}}",  "qA is the correct version, n=1 in HF-",    
-  "N112BfSUB3",  "v_{1}\{#Psi_{1Bf},#Psi_{2Bf}}",  "qA is the correct version, n=1 in HF-"
-
+    "N1HFgSUB3",             "v_{1}\{#Psi_{1}}",    "3 sub-event resolution - HF+ summed with HF-",
+    "N112CSUB2",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",  "1A (4<#eta<5) 2A (-0.8<#eta<0.8)",
+    "N112CSUB3",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",  "1A (4<#eta<5) 1C (-0.5<#eta<0.0) 2A (-3.5<#eta<-3.0)",
+      //26
+    "N112DSUB2",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",   "1A (-5<#eta<-4) 2A (-0.8<#eta<0.8)",
+    "N112DSUB3",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",   "1A (-5<#eta<-4) 1C(0.0<#eta<0.5) 2A (-0.8<#eta<0.8)",
+    "N112CombinedSUB2",  "v_{1}\{#Psi_{1A},#Psi_{2Cmid}}",  "1A (4<#eta<5) 1B (-5<#eta<-4) 2Cmid (-0.8<#eta<0.8)",
+    "N112CombinedSUB3",  "NG",  "NG",
+      //27
+    "N112ESUB2",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",  "1A (4<#eta<5) 2A (3.0<#eta<3.5)",
+    "N112ESUB3",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",  "1A (4<#eta<5) 1C (-1.6<#eta<-1.2) 2A (3.0<#eta<3.5)",
+    "N112FSUB2",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",  "1A -5<#eta<-4) 2A (-3.5<#eta<-3.0)",
+    "N112FSUB3",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",  "1A (-5<#eta<-4) 1C (1.2<#eta<1.6) 2A (-3.5<#eta<-3.0)",
+    "N112GSUB2",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",  "1A (4<#eta<5) 2A (-3.5<#eta<-3.0)",
+    "N112GSUB3",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",  "1A (4<#eta<5) 1C (-1.6<#eta<-1.2) 2A (-3.5<#eta<-3.0)",
+    "N112HSUB2",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",  "1A (-5<#eta<-4) 2A (3.0<#eta<3.5)",
+    "N112HSUB3",  "v_{1}\{#Psi_{1A},#Psi_{2A}}",  "1A (-5<#eta<-4) 1C (1.2<#eta<1.6) 2A (3.0<#eta<3.5)",
+    "N112MCASUB2",  "v_{1}\{#Psi_{1A},#Psi_{2A}}^{even}",  "1A (-2.4<#eta<-2.0) 2A (3.0<#eta<5.0)",
+    "N112MCASUB3",  "v_{1}\{#Psi_{1A},#Psi_{2A}}^{even}",  "1A (-2.4<#eta<-2.0) 1C (-0.8<#eta<0.8) 2A (3.0<#eta<5.0)"
       };

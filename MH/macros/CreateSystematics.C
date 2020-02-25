@@ -1,131 +1,215 @@
+#include "TFile.h"
+#include "TList.h"
+#include "TDirectory.h"
+#include "TCanvas.h"
+#include "TH1D.h"
+#include "TString.h"
+#include "TGraphErrors.h"
+#include "TLegend.h"
+#include "TLatex.h"
+#include "TLine.h"
+#include <iostream>
+#include <stdio.h>
+#include "SystematicsPlots.h"
+
+using namespace std;
+TH1D * hpercent = 0;
+TH1D * hpercentint = 0;
+TH1D * hdifferr = 0;
+TH1D * hdifferrint = 0;
+
 double maxR(double val);
-TCanvas *  CreateSystematics2(string replay="", TGraphErrors * gDefault=0, TGraphErrors *gSys1=0, string stattype1="", TGraphErrors * gSys2=0, string stattype2="", string etarange="", string centrange="", string xlabel="", string ylabel="",  string title="" );
-void CreateSystematics(string name ){
+TCanvas *  CreateSystematics2(string replay="", TGraphErrors * gDefault=0, TGraphErrors *gSys1=0, string stattype1="", TGraphErrors * gSys2=0, string stattype2="", string etarange="", string centrange="", string xlabel="", string ylabel="",  string title="" , bool pt=true);
+void CreateSystematics(string name="vnPlots.root" ){
   TFile * fin = new TFile(name.data(),"update");
   
   TList * l = (TList *) fin->GetListOfKeys();
-  indx = 0;
+  int indx = 0;
   bool defaultFound = false;
   bool tightFound = false;
+  bool tight2Found = false;
   bool looseFound = false;
   bool wideFound = false;
   bool narrowFound = false;
+  bool eposFound = false;
   string base;
   while(true) {
     base = l->At(indx)->GetName();
+    cout<<" --- "<<base<<endl;
     if(base=="default") {
       defaultFound=true; 
-      //  cout<<"default found"<<endl;
+      cout<<"default found"<<endl;
+    }
+    if(base=="epos") {
+      eposFound=true; 
+      cout<<"epos found"<<endl;
     }
     if(base=="tight" || base=="tight2")   {
       tightFound=true; 
-      // cout<<"tight found"<<endl;
+     cout<<"tight found"<<endl;
+     if(base=="tight2") tight2Found=true;
+     if(tight2Found) cout<<"tight2Found"<<endl;
     }
     if(base=="loose") {
       looseFound = true; 
-      // cout<<"loose found"<<endl;
+     cout<<"loose found"<<endl;
     }
     if(base=="wide") {
       wideFound = true; 
-      // cout<<"wide found"<<endl;
+      cout<<"wide found"<<endl;
     }
     if(base=="narrow") {
       narrowFound = true; 
-      // cout<<"narrowFound"<<endl;
+      cout<<"narrowFound"<<endl;
     }
     if(l->At(indx)==l->Last()) break;
     ++indx;  
   }
   if(defaultFound){
     TDirectory * defaultDir = (TDirectory *) fin->Get("default");
-    indx = 0;
     l = (TList *) defaultDir->GetListOfKeys();
-    while(true) {
+    indx = 0;
+    while(true)  {
       string base2 = l->At(indx)->GetName();
-      string stight="tight/"+base2; 
-      if(base=="tight2") stight="tight2/"+base2;
-      string sloose="loose/"+base2;
-      string swide="wide/"+base2;
-      string snarrow="narrow/"+base2;
+      //if(base2.find("N1SUB3")==std::string::npos) {++indx; continue;}
+      cout<<"******************************** "<<base2<<" **************************************"<<endl;
       TDirectory * subdir = (TDirectory *) defaultDir->Get(base2.data());
       TList * lsub = (TList *) subdir->GetListOfKeys();
       int subindx = 0;
       while(true){
-	string subbase = lsub->At(subindx)->GetName();
-	stight+="/"+subbase;
-	sloose+="/"+subbase;
-	swide+="/"+subbase;
-	snarrow+="/"+subbase;
-	TDirectory * subsubdir = (TDirectory *) subdir->Get(subbase.data());
-	TList * lsubsub = (TList *) subsubdir->GetListOfKeys();
-	int subsubindx = 0;
-	while(true){
-	  string subsubbase = lsubsub->At(subsubindx)->GetName();
-	  stight+="/"+subsubbase;
-	  sloose+="/"+subsubbase;
-	  swide+="/"+subsubbase;
-	  snarrow+="/"+subsubbase;
-	  TDirectory * subsubsubdir = (TDirectory *) subsubdir->Get(subsubbase.data());
-	  TList * lsubsubsub = (TList *) subsubsubdir->GetListOfKeys();
-	  int subsubsubindx = 0;
-	  string ytitle = "";
-	  while(true){
-	    string subsubsubbase = lsubsubsub->At(subsubsubindx)->GetName();
-	    if(subsubsubbase=="h") {
-	      ytitle = ((TH1D *) subsubsubdir->Get("h"))->GetYaxis()->GetTitle();
-	      ytitle=ytitle.substr(0,ytitle.find("}")+1);
-	    }
-	    if(subsubsubbase=="g"||subsubsubbase=="gA"||subsubsubbase=="gB") {
-	      TGraphErrors * g = (TGraphErrors *) subsubsubdir->Get(subsubsubbase.data());
-	      if(tightFound && looseFound) {
-		TGraphErrors * gSys1 = (TGraphErrors *) fin->Get(Form("%s/%s",sloose.data(),subsubsubbase.data()));
-		TGraphErrors * gSys2 = (TGraphErrors *) fin->Get(Form("%s/%s",stight.data(),subsubsubbase.data()));
-		TCanvas * can =  CreateSystematics2(base2,g, gSys1,"loose", gSys2, "tight", subbase, subsubbase,"p_{T} (GeV/c)", ytitle, subsubsubbase.data());
-		subsubsubdir->cd();
-		can->Write();
-		can->Close();
-	      }
-	      if(narrowFound && wideFound) {
-		TGraphErrors * gSys1 = (TGraphErrors *) fin->Get(Form("%s/%s",swide.data(),subsubsubbase.data()));
-		TGraphErrors * gSys2 = (TGraphErrors *) fin->Get(Form("%s/%s",snarrow.data(),subsubsubbase.data()));
-		TCanvas * can =  CreateSystematics2(base2,g, gSys1,"wide", gSys2, "narrow", subbase, subsubbase,"p_{T} (GeV/c)", ytitle, subsubsubbase.data());
-		subsubsubdir->cd();
-		can->Write();
-		can->Close();
-	      }
-	    }
-	    if(subsubsubbase=="gint"||subsubsubbase=="gintA"||subsubsubbase=="gintB") {
-	      TGraphErrors * g = (TGraphErrors *) subsubsubdir->Get(subsubsubbase.data());
-	      if(tightFound && looseFound) {
-		TGraphErrors * gSys1 = (TGraphErrors *) fin->Get(Form("%s/%s",sloose.data(),subsubsubbase.data()));
-		TGraphErrors * gSys2 = (TGraphErrors *) fin->Get(Form("%s/%s",stight.data(),subsubsubbase.data()));
-		TCanvas * can =  CreateSystematics2(base2,g, gSys1,"loose", gSys2, "tight", subbase, subsubbase,"#eta", ytitle, subsubsubbase.data());
-		subsubsubdir->cd();
-		can->Write();
-		can->Close();
-	      }
-	      if(narrowFound && wideFound) {
-		TGraphErrors * gSys1 = (TGraphErrors *) fin->Get(Form("%s/%s",swide.data(),subsubsubbase.data()));
-		TGraphErrors * gSys2 = (TGraphErrors *) fin->Get(Form("%s/%s",snarrow.data(),subsubsubbase.data()));
-		TCanvas * can =  CreateSystematics2(base2,g, gSys1,"wide", gSys2, "narrow", subbase, subsubbase,"#eta", ytitle, subsubsubbase.data());
-		subsubsubdir->cd();
-		can->Write();
-		can->Close();
-	      }
-	    }
+    	string subbase = lsub->At(subindx)->GetName();
+	//if(subbase.find("-0.8_0.8")==std::string::npos) {++subindx; continue;}
+    	//cout<<"   subbase: "<<subbase<<endl;
+	TDirectory * syserrdir = 0;
+      	TDirectory * subsubdir = (TDirectory *) subdir->Get(subbase.data());
+      	TList * lsubsub = (TList *) subsubdir->GetListOfKeys();
+    	int subsubindx = 0;
+      	while(true){
+      	  string subsubbase = lsubsub->At(subsubindx)->GetName();
 
-	    if(lsubsubsub->At(subsubsubindx)==lsubsubsub->Last()) break;
-
-
-	    ++subsubsubindx;
+	  //if(subsubbase.find("0_20")==std::string::npos) {++subsubindx; continue;}
+      	  TDirectory * subsubsubdir = (TDirectory *) subsubdir->Get(subsubbase.data());
+    	  //cout<<"      subsubbase: "<<subsubbase<<endl;
+      	  TList * lsubsubsub = (TList *) subsubsubdir->GetListOfKeys();
+	  syserrdir = (TDirectory *) subsubsubdir->Get("systematics");
+	  if(syserrdir==0) {
+	    syserrdir = (TDirectory *) subsubsubdir->mkdir("systematics");
 	  }
-	  if(lsubsub->At(subindx)==lsubsub->Last()) break;
-	  ++subsubindx;
-	}
-	if(lsub->At(subindx)==lsub->Last()) break;
-	++subindx;
+      	  string stight="tight/"+base2; 
+      	  if(tight2Found) stight="tight2/"+base2;
+      	  string sloose="loose/"+base2;
+      	  string swide="wide/"+base2;
+      	  string snarrow="narrow/"+base2;
+	  string sepos = "epos/"+base2;
+      	  stight+="/"+subbase;
+      	  sloose+="/"+subbase;
+      	  swide+="/"+subbase;
+      	  snarrow+="/"+subbase;
+	  sepos+="/"+subbase;
+      	  stight+="/"+subsubbase;
+      	  sloose+="/"+subsubbase;
+      	  swide+="/"+subsubbase;
+      	  snarrow+="/"+subsubbase;
+	  sepos+="/"+subsubbase;
+      	  int subsubsubindx = 0;
+      	  string ytitle = "";
+	  bool pt=true;
+      	  while(true){
+      	    string subsubsubbase = lsubsubsub->At(subsubsubindx)->GetName();
+    	    //cout<<"         subsubsubbase: "<<subsubsubbase<<endl;
+      	    if(subsubsubbase=="h") {
+      	      ytitle = ((TH1D *) subsubsubdir->Get("h"))->GetYaxis()->GetTitle();
+      	      ytitle=ytitle.substr(0,ytitle.find("}")+1);
+      	    }
+	    //      	    if(subsubsubbase=="g"||subsubsubbase=="gA"||subsubsubbase=="gB") {
+      	    if(subsubsubbase=="g") {
+      	      TGraphErrors * g = (TGraphErrors *) subsubsubdir->Get(subsubsubbase.data()); 
+	      if(tightFound && looseFound) {
+      		string s1 = Form("%s/%s",sloose.data(),subsubsubbase.data());
+      		string s2 = Form("%s/%s",stight.data(),subsubsubbase.data());
+      		TGraphErrors * gSys1 = (TGraphErrors *) fin->Get(Form("%s/%s",sloose.data(),subsubsubbase.data()));
+      		TGraphErrors * gSys2 = (TGraphErrors *) fin->Get(Form("%s/%s",stight.data(),subsubsubbase.data()));
+    		if(gSys1==0 || gSys2==0) cout<<"ERROR: "<<s1<<"\t"<<gSys1<<"\t"<<s2<<"\t"<<gSys2<<endl;
+		pt=true;
+     		TCanvas * can =  CreateSystematics2(base2,g, gSys1,"loose", gSys2, "tight", subbase, subsubbase,"p_{T} (GeV/c)", ytitle, subsubsubbase.data(),pt);
+      		syserrdir->cd();
+      		can->Write();
+      		can->Close();
+      	      }
+	      if(eposFound) {
+      		string s1 = Form("%s/%s",sloose.data(),subsubsubbase.data());
+      		TGraphErrors * gSys1 = (TGraphErrors *) fin->Get(Form("%s/%s",sepos.data(),subsubsubbase.data()));
+		TGraphErrors * gSys2 = 0;
+    		if(gSys1==0) cout<<"ERROR: "<<s1<<"\t"<<gSys1<<"\t"<<endl;
+		pt=true;
+     		TCanvas * can =  CreateSystematics2(base2,g, gSys1,"epos", gSys2, "", subbase, subsubbase,"p_{T} (GeV/c)", ytitle, subsubsubbase.data(),pt);
+      		syserrdir->cd();
+      		can->Write();
+      		can->Close();
+      	      }
+     	      if(narrowFound && wideFound) {
+      		string s1 = Form("%s/%s",swide.data(),subsubsubbase.data());
+      		string s2 = Form("%s/%s",snarrow.data(),subsubsubbase.data());
+      		TGraphErrors * gSys1 = (TGraphErrors *) fin->Get(Form("%s/%s",swide.data(),subsubsubbase.data()));
+      		TGraphErrors * gSys2 = (TGraphErrors *) fin->Get(Form("%s/%s",snarrow.data(),subsubsubbase.data()));
+    		if(gSys1==0 || gSys2==0) cout<<"ERROR: "<<s1<<"\t"<<gSys1<<"\t"<<s2<<"\t"<<gSys2<<endl;
+		pt=true;
+      		TCanvas * can =  CreateSystematics2(base2,g, gSys1,"wide", gSys2, "narrow", subbase, subsubbase,"p_{T} (GeV/c)", ytitle, subsubsubbase.data(),pt);
+      		syserrdir->cd();
+      		can->Write();
+      		can->Close();
+      	      }
+      	    }
+	    //      	    if(subsubsubbase=="gint"||subsubsubbase=="gintA"||subsubsubbase=="gintB") {
+      	    if(subsubsubbase=="gint") {
+      	      TGraphErrors * g = (TGraphErrors *) subsubsubdir->Get(subsubsubbase.data());
+      	      if(tightFound && looseFound) {
+      		string s1 = Form("%s/%s",sloose.data(),subsubsubbase.data());
+      		string s2 = Form("%s/%s",stight.data(),subsubsubbase.data());
+      		TGraphErrors * gSys1 = (TGraphErrors *) fin->Get(Form("%s/%s",sloose.data(),subsubsubbase.data()));
+      		TGraphErrors * gSys2 = (TGraphErrors *) fin->Get(Form("%s/%s",stight.data(),subsubsubbase.data()));
+    		if(gSys1==0 || gSys2==0) cout<<"ERROR: "<<s1<<"\t"<<gSys1<<"\t"<<s2<<"\t"<<gSys2<<endl;
+		pt=false;
+      		TCanvas * can =  CreateSystematics2(base2,g, gSys1,"loose", gSys2, "tight", subbase, subsubbase,"#eta", ytitle, subsubsubbase.data(),pt);
+      		syserrdir->cd();
+      		can->Write();
+      		can->Close();
+      	      }
+	      if(eposFound) {
+      		string s1 = Form("%s/%s",sloose.data(),subsubsubbase.data());
+      		TGraphErrors * gSys1 = (TGraphErrors *) fin->Get(Form("%s/%s",sepos.data(),subsubsubbase.data()));
+      		TGraphErrors * gSys2 = 0;
+    		if(gSys1==0 || gSys2==0) cout<<"ERROR: "<<s1<<"\t"<<gSys1<<endl;
+		pt=false;
+      		TCanvas * can =  CreateSystematics2(base2,g, gSys1,"epos", gSys2, "", subbase, subsubbase,"#eta", ytitle, subsubsubbase.data(),pt);
+      		syserrdir->cd();
+      		can->Write();
+      		can->Close();
+	      }
+      	      if(narrowFound && wideFound) {
+       		string s1 = Form("%s/%s",swide.data(),subsubsubbase.data());
+      		string s2 = Form("%s/%s",snarrow.data(),subsubsubbase.data());
+     		TGraphErrors * gSys1 = (TGraphErrors *) fin->Get(Form("%s/%s",swide.data(),subsubsubbase.data()));
+      		TGraphErrors * gSys2 = (TGraphErrors *) fin->Get(Form("%s/%s",snarrow.data(),subsubsubbase.data()));
+    		if(gSys1==0 || gSys2==0) cout<<"ERROR: "<<s1<<"\t"<<gSys1<<"\t"<<s2<<"\t"<<gSys2<<endl;
+		pt=false;
+      		TCanvas * can =  CreateSystematics2(base2,g, gSys1,"wide", gSys2, "narrow", subbase, subsubbase,"#eta", ytitle, subsubsubbase.data(),pt);
+      		syserrdir->cd();
+      		can->Write();
+      		can->Close();
+      	      }
+     	    }
+
+      	    if(lsubsubsub->At(subsubsubindx)==lsubsubsub->Last()) { break;}
+      	    ++subsubsubindx;
+      	  }
+      	  if(lsubsub->At(subsubindx)==lsubsub->Last()) { break;}
+      	  ++subsubindx;
+      	}
+      	if(lsub->At(subindx)==lsub->Last()) { break;}
+      	++subindx;
       }
-      if(l->At(indx)==l->Last()) break;
+      if(l->At(indx)==l->Last()) { break;}
       ++indx;  
     }
   }
@@ -170,20 +254,18 @@ double maxR(double val){
   return ret;
 }
 
-TCanvas *  CreateSystematics2(string replay, TGraphErrors * gDefault, TGraphErrors *gSys1, string systype1, TGraphErrors * gSys2, string systype2, string etarange, string centrange, string xlabel, string ylabel,  string title ){
-  //cout<<"In Create: "<<endl;
-  //cout<<"        ranges: "<<etarange<<"\t"<<centrange<<endl;
-  //cout<<"   axis labels: "<<xlabel<<"\t"<<ylabel<<"\t"<<endl;
-  //cout<<"         title: "<<title<<endl;
+TCanvas *  CreateSystematics2(string replay, TGraphErrors * gDefault, TGraphErrors *gSys1, string systype1, TGraphErrors * gSys2, string systype2, string etarange, string centrange, string xlabel, string ylabel,  string title , bool pt){
   string gname="trackQuality";
   if(systype2=="wide"||systype2=="narrow") gname = "vtxRange";
+  if(systype1=="epos") gname="epos";
   string rep2=systype2;
-  string canname = "syserr_"+replay+"_"+title+"_"+etarange+"_"+centrange+"_"+gname;
-  cout<<"       canname: "<<canname<<endl;
-  TCanvas * c = new TCanvas(canname.data(),canname.data(),600,900);
+  string canname = title+"_"+gname;
+  TCanvas * c = new TCanvas(canname.data(),canname.data(),1200,900);
   c->Draw();
-  c->Divide(1,3,0.0,0.0);
+  c->Divide(2,3);
+  //==============================================================================
   c->cd(1);
+  gPad->SetBottomMargin(0.008);
   string erange = etarange;
   erange.replace(erange.find("_"),1,"< #eta <");
   string crange = centrange;
@@ -203,30 +285,40 @@ TCanvas *  CreateSystematics2(string replay, TGraphErrors * gDefault, TGraphErro
   double yminSys2=0;
   double xmaxSys2=0;
   double ymaxSys2=0;
-  if(systype2!="") {
+  if(gSys2) {
     gSys2->SetMarkerStyle(20);
     gSys2->SetMarkerColor(kGreen);
     gSys2->SetLineColor(kGreen);
     gSys2->ComputeRange(xminSys2,yminSys2,xmaxSys2,ymaxSys2);
   }
-
   double minx = 0;
   double maxx = 10;
+  double minxdata = 0.3;
+  double maxxdata = 8;
+  double minxdata2 = 0.3;
+  double maxxdata2 = 3.0;
+
   string rng = erange;
+  //cout<<"title: "<<title<<endl;
   if(title.find("int")!=std::string::npos) {
     minx = -3;
     maxx = 3; 
+    minxdata = -2.4;
+    maxxdata = 2.4;
+    minxdata2 = 0.3;
+    maxxdata2 = 3.0;
     rng = crange;
+    //cout<<"set minx: "<<minx<<endl;
   } 
    
   TH1D * h = new TH1D("h","h",100,minx,maxx);
   h->SetDirectory(0);
   double setymin = 0;
-  if(min(yminSys1,yminSys1)<0) setymin = maxR(min(yminDefault,yminSys1)); 
-  double setymax = maxR(max(ymaxDefault,ymaxSys1));
-  if(rep2!="") {
-    if(min(setymax,yminSys2)<0) setymin = maxR(min(setymin,yminSys2));
-    double setymax = maxR(max(setymax,ymaxSys2));
+  if(min(yminSys1,yminDefault)<0) setymin = min(yminDefault,yminSys1); 
+  double setymax = max(ymaxDefault,ymaxSys1);
+  if(gSys2) {
+    if(yminSys2<setymin) setymin = yminSys2;
+    setymax = max(setymax,ymaxSys2);
   }
   if(setymin==0) setymin=0.0001*setymax;
   h->SetMinimum(setymin);
@@ -246,15 +338,15 @@ TCanvas *  CreateSystematics2(string replay, TGraphErrors * gDefault, TGraphErro
   h->GetYaxis()->SetTitleOffset(2.8);
   h->GetYaxis()->CenterTitle(1);
   h->Draw();
-  TLatex * lcalc = new TLatex(0.1*(maxx-minx)+minx,1.24*setymax,replay.data());
+  TLatex * lcalc = new TLatex(0.1*(maxx-minx)+minx,0.92*(1.4*setymax-setymin)+setymin,replay.data());
   lcalc->SetTextFont(43);
   lcalc->SetTextSize(26);
   lcalc->Draw(); 
-  TLatex * lr = new TLatex(0.1*(maxx-minx)+minx, 1.1*setymax, crange.data());
+  TLatex * lr = new TLatex(0.1*(maxx-minx)+minx, 0.82*(1.4*setymax-setymin)+setymin, crange.data());
   lr->SetTextFont(43);
   lr->SetTextSize(26);
   lr->Draw();
-  TLatex * lr2 = new TLatex(0.1*(maxx-minx)+minx, 0.96*setymax, erange.data());
+  TLatex * lr2 = new TLatex(0.1*(maxx-minx)+minx, 0.72*(1.4*setymax-setymin)+setymin, erange.data());
   lr2->SetTextFont(43);
   lr2->SetTextSize(26);
   if(title.find("gint")==std::string::npos) lr2->Draw();
@@ -266,64 +358,54 @@ TCanvas *  CreateSystematics2(string replay, TGraphErrors * gDefault, TGraphErro
   leg->SetTextFont(43);
   leg->SetTextSize(24);
   leg->AddEntry(gSys1,systype1.data(),"lp");
-  if(rep2!="") {
+  if(gSys2) {
     gSys2->Draw("p");
     leg->AddEntry(gSys2,systype2.data(),"lp");
   }
   leg->AddEntry(gDefault,"default","lp");
   leg->Draw();
-  TGraphErrors * gRatio = (TGraphErrors *) gSys1->Clone("Ratio");
-  for(int i = 0; i<gSys1->GetN(); i++){ 
-    if(gDefault->GetY()[i]!=0) {
-      double y1 = gSys1->GetY()[i];
-      double ey1 = gSys1->GetEY()[i];
-      double y2 = gDefault->GetY()[i];
-      double ey2 = gDefault->GetEY()[i];
-      gRatio->GetY()[i]=y1/y2; 
-      double try1 = pow(ey1/y1,2)+pow(ey2/y2,2)-2*pow(ey1,2)/y1/y2;
-      double try2 = pow(ey1/y1,2)+pow(ey2/y2,2)-2*pow(ey2,2)/y1/y2;
-      double err = 0;
-      if(try1>0) {
-	err = sqrt(try1);
-      } else if(try2>0) {
-	err = sqrt(try2);
-      } else {
-	cout<<"unable to calculate sys error"<<endl;
-	err = ey1*gRatio->GetY()[i]/y1;
-     }
-      gRatio->GetEY()[i] = err;
-    }
-  }
+  TGraph * grmin0 = 0;
+  TGraph * grmax0 = 0;
+  TGraph * grshade0 = 0;
+  TGraph * grmin1 = 0;
+  TGraph * grmax1 = 0;
+  TGraph * grshade1 = 0;
+  string gname1 = canname+"_"+systype1;
+  string gname2 = canname+"_"+systype2;
+  TGraphErrors * gRatio =ErrorPlot(gname1.data(),pt,true,0,gSys1,gDefault,grshade0,grmin0,grmax0,20,kBlue);
   TGraphErrors * gRatio2 = 0;
-  gRatio2 = (TGraphErrors *) gSys2->Clone("Ratio2");
-  if(systype2!="") {
-    for(int i = 0; i<gSys2->GetN(); i++){ 
-      if(gDefault->GetY()[i]!=0) {
-	double y1 = gSys2->GetY()[i];
-	double ey1 = gSys2->GetEY()[i];
-	double y2 = gDefault->GetY()[i];
-	double ey2 = gDefault->GetEY()[i];
-	gRatio2->GetY()[i]=y1/y2; 
-	double try1 = pow(ey1/y1,2)+pow(ey2/y2,2)-2*pow(ey1,2)/y1/y2;
-	double try2 = pow(ey1/y1,2)+pow(ey2/y2,2)-2*pow(ey2,2)/y1/y2;
-	double err = 0;
-	if(try1>0) {
-	  err = sqrt(try1);
-	} else if(try2>0) {
-	  err = sqrt(try2);
-	} else {
-	  cout<<"unable to calculate sys error"<<endl;
-	  err = ey1*gRatio2->GetY()[i]/y1;
-	}
-	gRatio2->GetEY()[i] = err;
-      }
-    }
-  }
-  c->cd(2);
+  if(gSys2) gRatio2=ErrorPlot(gname2.data(),pt,true,0,gSys2,gDefault,grshade1,grmin1,grmax1,20,kGreen);
+  TGraph * gdmin0 = 0;
+  TGraph * gdmax0 = 0;
+  TGraph * gdshade0 = 0;
+  TGraph * gdmin1 = 0;
+  TGraph * gdmax1 = 0;
+  TGraph * gdshade1 = 0;
+  string gdname1 = canname+"_"+systype1+"_dif";
+  string gdname2 = "";
+  if(gSys2) gdname2 = canname+"_"+systype2+"_dif";
+  TGraphErrors * gDiff =ErrorPlot(gdname1.data(),pt,false,0,gSys1,gDefault,gdshade0,gdmin0,gdmax0,20,kBlue);
+  TGraphErrors * gDiff2 = 0;
+  if(gSys2) gDiff2=ErrorPlot(gdname2.data(),pt,false,0,gSys2,gDefault,gdshade1,gdmin1,gdmax1,20,kGreen);
+  //==============================================================================
+  c->cd(3);
+  gPad->SetBottomMargin(0.008);
   TH1D * hr = new TH1D("hr","hr",100,minx,maxx);
   hr->SetDirectory(0);
   hr->SetMinimum(0.901);
   hr->SetMaximum(0.99*1.1);
+  for(int i = 0; i<gRatio->GetN(); i++) {
+    if(gRatio->GetY()[i]+gRatio->GetEY()[i] >1.1) {
+      hr->SetMinimum(0.801);
+      hr->SetMaximum(0.99*1.2);
+    }
+  }
+  for(int i = 0; i<gRatio->GetN(); i++) {
+    if(gRatio->GetY()[i]+gRatio->GetEY()[i] >1.2) {
+      hr->SetMinimum(0.501);
+      hr->SetMaximum(0.99*1.5);
+    }
+  }
   hr->SetXTitle(xlabel.data());
   hr->SetYTitle(Form("%s/%s{default}",ylabel.data(),ylabel.data()));
   hr->GetXaxis()->SetLabelFont(43);
@@ -345,35 +427,48 @@ TCanvas *  CreateSystematics2(string replay, TGraphErrors * gDefault, TGraphErro
   hrline->SetLineWidth(1);
   hrline->Draw();
   gRatio->Draw("p");
-  if(rep2!="" ) gRatio2->Draw("p");
-
-  TGraphErrors * gDiff = (TGraphErrors *) gSys1->Clone("Difference");
-  for(int i = 0; i<gSys1->GetN(); i++){ 
-    gDiff->GetY()[i]=1000.*(gSys1->GetY()[i]-gDefault->GetY()[i]); 
-    double eA = gSys1->GetEY()[i];
-    double eB = gDefault->GetEY()[i];
-    double e = sqrt(fabs(pow(eA,2)-pow(eB,2)));
-    gDiff->GetEY()[i] = 1000.*e;
-  }
+  if(gSys2 ) gRatio2->Draw("p");
   gDiff->ComputeRange(xminSys1,yminSys1,xmaxSys1,ymaxSys1);
-  TGraphErrors * gDiff2;
-  if(rep2!="") {
-    gDiff2 = (TGraphErrors *) gSys2->Clone("Difference2");
-    for(int i = 0; i<gSys2->GetN(); i++){ 
-      gDiff2->GetY()[i]=1000.*(gSys2->GetY()[i]-gDefault->GetY()[i]); 
-      double eA = gSys2->GetEY()[i];
-      double eB = gDefault->GetEY()[i];
-      double e = sqrt(fabs(pow(eA,2)-pow(eB,2)));
-      gDiff2->GetEY()[i] = 1000.*e;
-    }
-    gDiff->ComputeRange(xminSys2,yminSys2,xmaxSys2,ymaxSys2);
+  if(gSys2) gDiff2->ComputeRange(xminSys2,yminSys2,xmaxSys2,ymaxSys2);
+  //==============================================================================
+  c->cd(4);
+  gPad->SetBottomMargin(0.008);
+  crange=crange+"%";
+  if(setymin==0) setymin=0.0001*setymax;
+  if(hpercent==0 && pt) {
+    hpercent = new TH1D("hpercent","hpercent",100,minx,maxx);
+    hpercent->SetXTitle(hr->GetXaxis()->GetTitle());
+    hpercent->SetYTitle("\% uncertainty");
+    hpercent->SetMinimum(-20);
+    hpercent->SetMaximum(40);
   }
-  c->cd(3);
+  if(hpercentint==0 && !pt) {
+    hpercentint = new TH1D("hpercent","hpercent",100,minx,maxx);
+    hpercentint->SetXTitle(hr->GetXaxis()->GetTitle());
+    hpercentint->SetYTitle("\% uncertainty");
+    hpercentint->SetMinimum(-20);
+    hpercentint->SetMaximum(40);
+  }
+  if(pt) {
+    hpercent->Draw();
+  } else {
+    hpercentint->Draw();
+  }
+  grshade0->Draw("f");
+  grmin0->Draw("l");
+  grmax0->Draw("l");
+  if(gSys2) {
+    grshade1->Draw("f");
+    grmin1->Draw("l");
+    grmax1->Draw("l");
+  }
+  //=========================================================================================
+  c->cd(5);
   TH1D * hd = new TH1D("hd","hd",100,minx,maxx);
   hd->SetDirectory(0);
   setymin = 0;
   if(yminSys1<0) setymin = yminSys1; 
-  if(rep2!="" && yminSys2<setymin) setymin = yminSys2;
+  if(gSys2 && yminSys2<setymin) setymin = yminSys2;
   setymax = max(ymaxSys1,ymaxSys2);
   hd->SetMinimum(setymin-0.1*(setymax-setymin));
   hd->SetMaximum(setymax+0.1*(setymax-setymin));
@@ -394,7 +489,40 @@ TCanvas *  CreateSystematics2(string replay, TGraphErrors * gDefault, TGraphErro
   gPad->SetGrid(1,1);
   hd->Draw();
   gDiff->Draw("p");
-  if(systype2!="") gDiff2->Draw("p");
+  if(gSys2) gDiff2->Draw("p");
+
+  //==============================================================================
+  c->cd(6);
+  crange=crange+"%";
+  if(setymin==0) setymin=0.0001*setymax;
+  if(hdifferr==0 && pt) {
+    hdifferr = new TH1D("hdifferr","hdifferr",100,minx,maxx);
+    hdifferr->SetXTitle(hr->GetXaxis()->GetTitle());
+    hdifferr->SetYTitle("Absolute Uncertainty (x1000)");
+    hdifferr->SetMinimum(-1);
+    hdifferr->SetMaximum(1);
+  }
+  if(hdifferrint==0 && !pt) {
+    hdifferrint = new TH1D("hdifferr","hdifferr",100,minx,maxx);
+    hdifferrint->SetXTitle(hr->GetXaxis()->GetTitle());
+    hdifferrint->SetYTitle("Absolute Uncertainty (x 1000)");
+    hdifferrint->SetMinimum(-1);
+    hdifferrint->SetMaximum(1);
+  }
+  if(pt) {
+    hdifferr->Draw();
+  } else {
+    hdifferrint->Draw();
+  }
+
+  gdshade0->Draw("f");
+  gdmin0->Draw("l");
+  gdmax0->Draw("l");
+  if(gSys2) {
+    gdshade1->Draw("f");
+    gdmin1->Draw("l");
+    gdmax1->Draw("l");
+  }
   string outdir = Form("systematics/%s",replay.data());
   FILE * ftest = fopen(outdir.data(),"r");
   if(ftest==NULL) {
@@ -402,10 +530,10 @@ TCanvas *  CreateSystematics2(string replay, TGraphErrors * gDefault, TGraphErro
   } else {
     fclose(ftest);
   }
-  if(gname.find("int")!=std::string::npos) {
+  if(title.find("int")!=std::string::npos) {
     c->Print(Form("systematics/%s/%s_%s_%s.pdf",replay.data(),gname.data(),title.data(),centrange.data()),"pdf");
   } else {
-    c->Print(Form("systematics/%s/%s_%s_%s.pdf",replay.data(),gname.data(),title.data(),etarange.data()),"pdf");
+    c->Print(Form("systematics/%s/%s_%s_%s_%s.pdf",replay.data(),gname.data(),title.data(),etarange.data(),centrange.data()),"pdf");
   } 
   return c;
 }

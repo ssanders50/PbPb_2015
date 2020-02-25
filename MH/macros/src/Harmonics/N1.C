@@ -25,7 +25,9 @@ TGraphErrors * N1(int replay, int bin, double eMin, double eMax, double & ymin, 
   cout<<"N1 replay with replay = "<<replay<<"\t"<<ANALS[replay][0]<<endl;
   int A = N1ASUB2;
   int B = N1BSUB2;
-
+  if(replay==N1SUB2) {
+    replay=N1HFp1gSUB2;
+  }
   if(replay==N1ASUB2) {
     A = N1ASUB2;
     B = N1BSUB2;
@@ -98,12 +100,26 @@ TGraphErrors * N1(int replay, int bin, double eMin, double eMax, double & ymin, 
   } else if (replay == N1HFfSUB3) {
     A = N1HFp1fSUB3;
     B = N1HFm1fSUB3;
-    epindxA = HFp1f;
-    epindxB = HFm1f;
+   epindxA = HFp1f;
+   epindxB = HFm1f;
   }
+
+  if(replay==N1HFgSUB2) {
+    A = N1HFp1gSUB2;
+    B = N1HFm1gSUB2;
+    Decor = false;
+  } else if (replay == N1HFgSUB3) {
+    A = N1HFp1gSUB3;
+    B = N1HFm1gSUB3;
+    epindxA = HFp1g;
+    epindxB = HFm1g;
+  }
+  cout<<"epindxA: "<<epindxA<<endl;
   if(epindxA>=0) {
     cout<<"A: "<<A<<"\t"<<ANALS[A][0]<<"\t"<<EPNames[epindxA]<<"\t"<<EPNames[RCMate1[epindxA]]<<"\t"<<EPNames[RCMate2[epindxA]]<<endl;
     cout<<"B: "<<B<<"\t"<<ANALS[B][0]<<"\t"<<EPNames[epindxB]<<"\t"<<EPNames[RCMate1[epindxB]]<<"\t"<<EPNames[RCMate2[epindxB]]<<endl;
+  } else {
+    cout<<"replay: "<<ANALS[replay][0]<<endl;
   }
   //
   // Start with eta distribution
@@ -128,26 +144,30 @@ TGraphErrors * N1(int replay, int bin, double eMin, double eMax, double & ymin, 
       double EtaMax = EtaMin+0.4;
       if(fabs(EtaMin)<0.001) EtaMin = 0.;
       if(fabs(EtaMax)<0.001) EtaMax = 0.;
+      cout<<ANALS[A][0]<<endl;
       g = GetVNPt(A,bin,epindxA,EtaMin,EtaMax,gA, gB, gSpec, vint, vinte,vintA, vintAe, vintB, vintBe, false);
       fin->Close();
       fin = new TFile(rootFile.data(),"r");
+      cout<<ANALS[B][0]<<endl;
       g2 = GetVNPt(B,bin,epindxB,EtaMin,EtaMax,gA2, gB2, gSpec2, vint2, vinte2,vintA2, vintAe2, vintB2, vintBe2, false);
       fin->Close();
-      gint->GetY()[i] = (vintA+vintA2)/2.;
-      double e = sqrt(pow(vintAe,2)+pow(vintAe2,2)+2*vintA*vintA2*min(vintAe,vintAe2));
+      gint->GetY()[i] = (vintA-vintA2)/2.;
+      double arg = pow(vintAe,2)+pow(vintAe2,2)+2*vintA*vintA2*min(vintAe,vintAe2);
+      if(arg<=0) arg=pow(vintAe,2)+pow(vintAe2,2);
+      double e = sqrt(arg)/2.;
+      //cout<<"e: "<<e<<"\t"<<gint->GetY()[i]<<endl; 
       gint->GetEY()[i] = e;
-      gintA->GetY()[i]=(vintA+vintA2)/2.;
-      gintA->GetEY()[i]= gintA->GetY()[i]*e;
-      e = sqrt(pow(vintBe,2)+pow(vintBe2,2)+2*vintA*vintB2*min(vintBe,vintBe2));
-      gintB->GetY()[i]=(vintB+vintB2)/2.;
-      gintB->GetEY()[i]=e;
+      gintA->GetY()[i]=vintA;
+      gintA->GetEY()[i]= vintAe;
+      gintB->GetY()[i]=vintA2;
+      gintB->GetEY()[i]=vintAe2;
     }
   }
   gint->SetName("gint");
-  //gintA->SetName("gintA");
-  //gintB->SetName("gintB");
-  gintA->SetTitle("NOGOOD");
-  gintB->SetTitle("NOGOOD");
+  gintA->SetName("gintA");
+  gintB->SetName("gintB");
+  //gintA->SetTitle("NOGOOD");
+  //gintB->SetTitle("NOGOOD");
   //
   // Now do requested calculation
   //
@@ -170,22 +190,18 @@ TGraphErrors * N1(int replay, int bin, double eMin, double eMax, double & ymin, 
   g2 = GetVNPt(B,bin,epindxB,eMin,eMax,gA2, gB2, gSpec2, vint2, vinte2, vintA2, vintAe2, vintB2, vintBe2,false);
   fin->Close();
   for(int i = 0; i<g->GetN(); i++) {
-    g->GetY()[i] = (g->GetY()[i]+g2->GetY()[i])/2.;
-    double e = sqrt(pow(g->GetEY()[i],2)+pow(g2->GetEY()[i],2)+2*g->GetEY()[i]*g2->GetEY()[i]*min(g->GetEY()[i],g2->GetEY()[i]));
+    g->GetY()[i] = (gA->GetY()[i]-gA2->GetY()[i])/2.;
+    double e = sqrt(pow(gA->GetEY()[i],2)+pow(gA2->GetEY()[i],2)+2*gA->GetEY()[i]*gA2->GetEY()[i]*min(gA->GetEY()[i],gA2->GetEY()[i]));
     g->GetEY()[i] = e;
-    e = sqrt(pow(gA->GetEY()[i],2)+pow(gA2->GetEY()[i],2)+2*gA->GetEY()[i]*gA2->GetEY()[i]*min(gA->GetEY()[i],gA2->GetEY()[i]));
-    gA->GetY()[i] = (gA->GetY()[i]+gA2->GetY()[i])/2.;
-    gA->GetEY()[i] = e;
-    e = sqrt(pow(gB->GetEY()[i],2)+pow(gB2->GetEY()[i],2)+2*gB->GetEY()[i]*gB2->GetEY()[i]*min(gB->GetEY()[i],gB2->GetEY()[i]));
-    gB->GetY()[i] = (gB->GetY()[i]+gB2->GetY()[i])/2.;
-    gA->GetEY()[i] = e;
+    gB->GetY()[i] = gA2->GetY()[i];
+    gB->GetEY()[i]=gA2->GetEY()[i];
   }
   ymin = setYmin(g);
   ymax = setYmax(g);
   g->SetName("g");
   gA->SetName("gA");
   gB->SetName("gB");
-  gA->SetTitle("NOGOOD");
-  gB->SetTitle("NOGOOD");
+  //gA->SetTitle("NOGOOD");
+  //gB->SetTitle("NOGOOD");
   return g;
 }

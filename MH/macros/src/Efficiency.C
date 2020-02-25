@@ -133,7 +133,11 @@ TrackType SetTracking( ){
   if(sTrackReaction==PbPb) {
     if(sTrackType == Pixel && sTrackQuality == normal) {
       fakeFile = new TFile("EffAndFake/PbPb/FakeRatesPixelPbPb_tight.root");
+      if(EPOS) {
+      effFile = new TFile("EffAndFake/PbPb/EffCorrectionsPixelPbPb_EposTight.root");
+      } else {
       effFile = new TFile("EffAndFake/PbPb/EffCorrectionsPixelPbPb_tight.root");
+      }
     }
     if(sTrackType == Pixel && sTrackQuality == tight){ 
       fakeFile = new TFile("EffAndFake/PbPb/FakeRatesPixelPbPb_tight.root");
@@ -215,8 +219,8 @@ double FakeAndEff(int cent, double pt, double emin, double emax, double &eff) {
       eff += he->GetBinContent(i,ptbin);
     }
     eff /=(double)(etabinmax-etabinmin+1);
+    //      cout<<"FakeAndEff: etabinmin,etabinmax,pt,ptbin,eff: "<<emin<<"\t"<<emax<<"\t"<<etabinmin<<"\t"<<etabinmax<<"\t"<<pt<<"\t"<<ptbin<<"\t"<<eff<<endl;
     he->Delete();
-
   } 
 
   if(fakeFile!=NULL) {

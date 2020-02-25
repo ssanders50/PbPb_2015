@@ -1,0 +1,36 @@
+TFile * fin = new TFile("../../MH_AMPT.root");
+void Plot_AMPT_RP(int mincent = 15, int maxcent = 20){
+  TH2D * v12D = (TH2D *) fin->Get(Form("vnanalyzer/MC/%d_%d/v1",mincent,maxcent));
+  TH2D * v22D = (TH2D *) fin->Get(Form("vnanalyzer/MC/%d_%d/v2",mincent,maxcent));
+  TH2D * vncnt2D = (TH2D *) fin->Get(Form("vnanalyzer/MC/%d_%d/vnCntMC",mincent,maxcent));
+  TH1D * v1 = (TH1D *) v12D->ProjectionY("v1",1,10);
+  TH1D * vcnt = (TH1D *) vncnt2D->ProjectionY("cnt",1,10);
+  TH1D * v2 = (TH1D *) v22D->ProjectionY("v2",1,10);
+  v1->SetMarkerStyle(20);
+  v1->SetMarkerSize(1.2);
+  v1->SetMarkerColor(kBlue);
+  v1->SetLineColor(kBlue);
+  v2->SetMarkerStyle(20);
+  v2->SetMarkerSize(1.2);
+  v2->SetMarkerColor(kBlue);
+  v2->SetLineColor(kBlue);
+  v1->Divide(vcnt);
+  v1->SetXTitle("#eta");
+  v1->SetYTitle("v_{1}^{RP}");
+  v1->SetMinimum(-0.001);
+  v1->SetMaximum(0.001);
+  v2->Divide(vcnt);
+  v2->SetXTitle("#eta");
+  v2->SetYTitle("v_{2}^{RP}");
+  v2->SetMinimum(0);
+  v2->SetMaximum(0.1);
+  TCanvas * c = new TCanvas("c","c",1200,900);
+  c->Divide(2);
+  c->cd(1);
+  v1->Draw();
+  TLatex * l = new TLatex(-2,0.0008,Form("AMPT (%d - %d%c)",mincent,maxcent,'%'));
+  l->Draw();
+  c->cd(2);
+  v2->Draw();
+  c->Print("Plot_AMPT_RP.pdf","pdf");
+}
